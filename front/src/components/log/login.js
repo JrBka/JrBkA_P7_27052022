@@ -27,6 +27,12 @@ function login({ email, setEmail, password, setPassword }) {
         if (error.response.status == 400) {
           passwordError.innerHTML = error.response.data.message;
         }
+        if (error.response.status != 401) {
+          emailError.innerHTML = "";
+        }
+        if (error.response.status != 400) {
+          passwordError.innerHTML = "";
+        }
       });
   };
   return (
