@@ -4,6 +4,8 @@ import Login from "./login";
 function Log() {
   const [signupModal, setSignupModal] = useState(true);
   const [loginModal, setLoginModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleModals = (e) => {
     if (e.target.id === "signup") {
@@ -27,7 +29,14 @@ function Log() {
         </li>
       </ul>
       {signupModal && <Signup />}
-      {loginModal && <Login />}
+      {loginModal && (
+        <Login
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+        />
+      )}
     </div>
   );
 }
