@@ -64,7 +64,7 @@ module.exports.modifyUser = (req, res) => {
                 [req.body.password, req.params.id],
                 (err, result) => {
                   if (err) {
-                    res
+                    return res
                       .status(400)
                       .json({ message: "Problème modification mdp" + err });
                   }
@@ -105,7 +105,7 @@ module.exports.modifyUser = (req, res) => {
 
         // modif photo de profil
         if (req.file) {
-          const photoProfil = "http://localhost:5000/images/profil.jpg";
+          const photoProfil = "http://localhost:5000/images/profil/profil.jpg";
           if (resultat[0].photo == photoProfil) {
             const modifPhoto = {
               ...req.body,
@@ -156,13 +156,14 @@ module.exports.modifyUser = (req, res) => {
         }
 
         // modifs pseudo
-        if (req.body.pseudo) {
+        const regexPseudo = /^[a-zA-Z]{3,20}[0-9]{0,10}$/;
+        if (regexPseudo.exec(req.body.pseudo)) {
           db.query(
             `UPDATE users SET pseudo = ? WHERE id = ?`,
             [req.body.pseudo, req.params.id],
             (err, result) => {
               if (err) {
-                return res
+                res
                   .status(400)
                   .json({ message: "Problème de modification  " + err });
               }
@@ -207,7 +208,7 @@ module.exports.deleteUser = (req, res) => {
       if (data[0].id != req.cookies.token.id) {
         return res.status(400).json({ message: "Requete non autorisé" });
       }
-      const photoProfil = "http://localhost:5000/images/profil.jpg";
+      const photoProfil = "http://localhost:5000/images/profil/profil.jpg";
       if (data[0].photo == photoProfil) {
         db.query(
           `DELETE FROM users WHERE id = "${req.params.id}"`,

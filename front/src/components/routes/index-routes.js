@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Log from "../../pages/log";
-import Home from "../../pages/home";
+import Log from "../../pages/log-pages";
+import Home from "../../pages/home-pages";
 
-const index = () => {
+const Index = () => {
   return (
     <Router>
       <Routes>
@@ -14,4 +14,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;

@@ -7,62 +7,69 @@ const emailValidator = require("email-validator");
 
 module.exports.signup = (req, res) => {
   try {
-    db.query(
-      `SELECT * FROM users WHERE pseudo = ?`,
-      req.body.pseudo,
-      (err, result) => {
-        if (result[0]) {
-          return res.status(400).json({ message: "Pseudo déjà utilisé" });
-        } else {
-          db.query(
-            `SELECT email FROM users WHERE email = ?`,
-            req.body.email,
-            (err, result) => {
-              if (result[0]) {
-                return res.status(400).json({ message: "Email déjà utilisé" });
-              } else {
-                if (emailValidator.validate(req.body.email)) {
-                  if (schemaPwd.validate(req.body.password)) {
-                    let pwd = req.body.password;
-                    pwdSecret = bcrypt.hash(pwd, 10).then((hash) => {
-                      console.log(hash);
-                      req.body.password = hash;
-                      const user = { ...req.body };
-                      const insert = "INSERT INTO users SET ?";
-                      db.query(insert, user, (err, result) => {
-                        if (err) {
-                          res.status(400).json({
-                            message: "Problème création utilisateur" + err,
-                          });
-                        } else {
-                          db.query(
-                            `SELECT id, pseudo, email FROM users WHERE email = ?  `,
-                            req.body.email,
-                            (err, resultat) => {
-                              console.log(resultat[0]);
-                              res.status(201).json({
-                                message: "Utilisateur créé !",
-                                profil: resultat[0],
-                              });
-                            }
-                          );
-                        }
-                      });
-                    });
-                  } else {
-                    return res
-                      .status(401)
-                      .json({ error: "Mot de pass invalide !" });
-                  }
+    const regexPseudo = /^[a-zA-Z]{3,20}[0-9]{0,10}$/;
+    if (regexPseudo.exec(req.body.pseudo)) {
+      db.query(
+        `SELECT * FROM users WHERE pseudo = ?`,
+        req.body.pseudo,
+        (err, result) => {
+          if (result[0]) {
+            return res.status(400).json({ message: "Pseudo déjà utilisé" });
+          } else {
+            db.query(
+              `SELECT email FROM users WHERE email = ?`,
+              req.body.email,
+              (err, result) => {
+                if (result[0]) {
+                  return res
+                    .status(400)
+                    .json({ message: "Email déjà utilisé" });
                 } else {
-                  return res.status(401).json({ error: "Email invalide" });
+                  if (emailValidator.validate(req.body.email)) {
+                    if (schemaPwd.validate(req.body.password)) {
+                      let pwd = req.body.password;
+                      pwdSecret = bcrypt.hash(pwd, 10).then((hash) => {
+                        console.log(hash);
+                        req.body.password = hash;
+                        const user = { ...req.body };
+                        const insert = "INSERT INTO users SET ?";
+                        db.query(insert, user, (err, result) => {
+                          if (err) {
+                            res.status(400).json({
+                              message: "Problème création utilisateur" + err,
+                            });
+                          } else {
+                            db.query(
+                              `SELECT id, pseudo, email FROM users WHERE email = ?  `,
+                              req.body.email,
+                              (err, resultat) => {
+                                console.log(resultat[0]);
+                                res.status(201).json({
+                                  message: "Utilisateur créé !",
+                                  profil: resultat[0],
+                                });
+                              }
+                            );
+                          }
+                        });
+                      });
+                    } else {
+                      return res
+                        .status(401)
+                        .json({ error: "Mot de pass invalide !" });
+                    }
+                  } else {
+                    return res.status(401).json({ error: "Email invalide" });
+                  }
                 }
               }
-            }
-          );
+            );
+          }
         }
-      }
-    );
+      );
+    } else {
+      return res.status(400).json({ error: "Pseudo invalide" });
+    }
   } catch (error) {
     res.statut(400).json(error);
   }
@@ -77,7 +84,6 @@ module.exports.login = (req, res, next) => {
           req.body.email,
           (err, data) => {
             if (!data[0]) {
-              console.log(data[0]);
               return res
                 .status(401)
                 .json({ message: "Utilisateur non trouvé !" });
@@ -88,7 +94,7 @@ module.exports.login = (req, res, next) => {
               .then((valid) => {
                 if (!valid) {
                   return res
-                    .status(401)
+                    .status(400)
                     .json({ message: "Mot de passe incorrect !" });
                 }
 
@@ -100,9 +106,12 @@ module.exports.login = (req, res, next) => {
                     { expiresIn: "24h" }
                   ),
                 };
+
                 res.cookie("token", token, {
+                  sameSite: true,
                   httpOnly: true,
-                  maxAge: 1 * 24 * 60 * 60 * 1000 /*secure : true*/,
+                  maxAge: 1 * 24 * 60 * 60 * 1000,
+                  //secure: true,
                 });
                 res.status(200).json({
                   message: "Vous êtes connecté",
@@ -118,10 +127,10 @@ module.exports.login = (req, res, next) => {
         res.status(400).json({ message: "Mot de pass invalide !" });
       }
     } else {
-      res.status(400).json({ message: "Email invalide !" });
+      res.status(401).json({ message: "Email invalide !" });
     }
   } catch (error) {
-    res.status(400).json({ message: "Problème connexion" + error });
+    res.status(500).json({ message: "Problème connexion" + error });
   }
 };
 

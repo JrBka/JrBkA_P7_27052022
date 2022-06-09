@@ -3,10 +3,13 @@ const dotenv = require("dotenv").config();
 const dbConfig = require("../config/database");
 const db = dbConfig.connectDb();
 
-module.exports.auth = (req, res, next) => {
+module.exports.getUserId = (req, res, next) => {
   try {
     const token = req.cookies.token.token;
-
+    if (!token) {
+      console.log("ok");
+      window.loation = "http://localhost:3000/";
+    }
     if (token) {
       jsonwebtoken.verify(
         token,
@@ -23,11 +26,10 @@ module.exports.auth = (req, res, next) => {
               decodedToken.id,
               (err, result) => {
                 const user = result;
-                res.locals.user = user;
+                res.status(200).json({ userId: user[0].id });
                 console.log("utilisateur authentifié :", user[0].pseudo);
               }
             );
-            next();
           }
         }
       );
