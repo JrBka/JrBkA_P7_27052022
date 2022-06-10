@@ -6,7 +6,7 @@ const commentController = require("../controllers/comment.controllers");
 const multer = require("../middleware/multer-config-posts");
 
 //post
-router.get("/", auth.auth, postController.getAllPost);
+router.get("/", auth.auth, postController.getPosts);
 router.post("/", auth.auth, multer, postController.createPost);
 router.put("/:id", auth.auth, multer, postController.modifyPost);
 router.delete("/:id", auth.auth, postController.deletePost);
@@ -17,8 +17,8 @@ router.get("/like/:id", auth.auth, likeController.numbersOflike);
 
 //comments
 router.post("/comment", auth.auth, commentController.createComment);
-router.get("/comment", auth.auth, commentController.getAllComment);
-router.get("/comment/:id", auth.auth, commentController.getOneComment);
+router.get("/comment", auth.auth, commentController.getComments);
+router.get("/comment/:id", auth.auth, commentController.getComment);
 router.put("/comment/:id", auth.auth, commentController.modifyComment);
 router.delete("/comment/:id", auth.auth, commentController.deleteComment);
 

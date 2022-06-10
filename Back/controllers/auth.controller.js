@@ -71,7 +71,7 @@ module.exports.signup = (req, res) => {
       return res.status(400).json({ error: "Pseudo invalide" });
     }
   } catch (error) {
-    res.statut(400).json(error);
+    res.status(400).json(error);
   }
 };
 
@@ -135,7 +135,8 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.logout = (req, res) => {
-  res.cookie("token", "", { maxAge: 1000 /* 1000ms = 1s*/ });
+  res.cookie("token", "", { maxAge: -1 });
+
   //res.redirect("");
   res.status(200).json({ message: "Vous êtes déconnecté" });
 };

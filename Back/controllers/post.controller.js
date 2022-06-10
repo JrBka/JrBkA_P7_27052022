@@ -2,11 +2,11 @@ const dbConfig = require("../config/database");
 const db = dbConfig.connectDb();
 const fs = require("fs");
 
-module.exports.getAllPost = (req, res) => {
+module.exports.getPosts = (req, res) => {
   try {
     db.query(`SELECT * FROM posts`, (err, result) => {
       if (!result) {
-        res.status(400).json({ message: "utilisateurs introuvables" });
+        res.status(400).json({ message: "post introuvable" });
       }
       res.status(200).json(result);
     });
@@ -19,31 +19,23 @@ module.exports.createPost = (req, res) => {
   try {
     //Post avec photo
     if (req.file) {
-      const newPost = {
+      var newPost = {
         ...req.body,
         photo: `${req.protocol}://${req.get("host")}/images/posts/${
           req.file.filename
         }`,
       };
-
-      db.query(`INSERT INTO posts SET ?`, newPost, (err, result) => {
-        if (err) {
-          res.status(400).json({ message: "Post invalide  " + err });
-        } else {
-          res.status(201).json({ message: "Post créé" });
-        }
-      });
     } else {
       // Post sans photo
-      const newPost = { ...req.body };
-      db.query(`INSERT INTO posts SET ?`, newPost, (err, result) => {
-        if (err) {
-          res.status(400).json({ message: "Post invalide  " + err });
-        } else {
-          res.status(201).json({ message: "Post créé" });
-        }
-      });
+      var newPost = { ...req.body };
     }
+    db.query(`INSERT INTO posts SET ?`, newPost, (err, result) => {
+      if (err) {
+        res.status(400).json({ message: "Post invalide  " + err });
+      } else {
+        res.status(201).json({ message: "Post créé" });
+      }
+    });
   } catch (error) {
     return res.status(400).json({ message: error });
   }
@@ -67,8 +59,8 @@ module.exports.modifyPost = (req, res) => {
         ) {
           return res.status(400).json({ message: "Requête non authorisé !" });
         }
-        if (req.file) {
-          const newPost = {
+        if (req.file && resultat[0].photo != null) {
+          var newPost = {
             ...req.body,
             photo: `${req.protocol}://${req.get("host")}/images/posts/${
               req.file.filename
@@ -76,37 +68,32 @@ module.exports.modifyPost = (req, res) => {
           };
           const filename = resultat[0].photo.split("/posts/")[1];
 
-          fs.unlink(`images/posts/${filename}`, () => {
-            db.query(
-              `UPDATE posts SET ? WHERE postId = ?`,
-              [newPost, req.params.id],
-              (err, result) => {
-                if (err) {
-                  return res
-                    .status(400)
-                    .json({ message: "Problème post  " + err });
-                } else {
-                  res.status(200).json({ message: "Post modifié" });
-                }
-              }
-            );
-          });
-        } else {
-          const post = { ...req.body };
-          db.query(
-            `UPDATE posts SET ? WHERE postId = ?`,
-            [post, req.params.id],
-            (err, result) => {
-              if (err) {
-                return res
-                  .status(400)
-                  .json({ message: "Problème post  " + err });
-              } else {
-                res.status(200).json({ message: "Post modifié" });
-              }
-            }
-          );
+          fs.unlink(`images/posts/${filename}`, () => {});
         }
+        if (req.file && resultat[0].photo == null) {
+          var newPost = {
+            ...req.body,
+            photo: `${req.protocol}://${req.get("host")}/images/posts/${
+              req.file.filename
+            }`,
+          };
+        }
+        if (!req.file) {
+          var newPost = { ...req.body };
+        }
+        db.query(
+          `UPDATE posts SET ? WHERE postId = ?`,
+          [newPost, req.params.id],
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({ message: "Problème post  " + err });
+            } else {
+              return res
+                .status(200)
+                .json({ message: "Post modifié, pas de modification image" });
+            }
+          }
+        );
       }
     );
   } catch (error) {
@@ -124,41 +111,27 @@ module.exports.deletePost = (req, res) => {
       }
       if (resultat[0].posterId != req.cookies.token.id) {
         return res.status(400).json({ message: "Requete non autorisé" });
-      } else {
-        if (resultat[0].photo) {
-          const filename = resultat[0].photo.split("/posts/")[1];
-
-          fs.unlink(`images/posts/${filename}`, () => {
-            db.query(
-              `DELETE FROM posts WHERE postId = ?`,
-              req.params.id,
-              (err, result) => {
-                if (err) {
-                  return res
-                    .status(400)
-                    .json({ message: "Suppression échoué  " + err });
-                } else {
-                  res.status(200).json({ message: "post supprimé" });
-                }
-              }
-            );
-          });
-        } else {
-          db.query(
-            `DELETE FROM posts WHERE postId = ?`,
-            req.params.id,
-            (err, result) => {
-              if (err) {
-                return res
-                  .status(400)
-                  .json({ message: "Suppression échoué  " + err });
-              } else {
-                res.status(200).json({ message: "post supprimé" });
-              }
-            }
-          );
-        }
       }
+      if (resultat[0].photo) {
+        const filename = resultat[0].photo.split("/posts/")[1];
+
+        fs.unlink(`images/posts/${filename}`, () => {
+          console.log(filename, ": supprimé");
+        });
+      }
+      db.query(
+        `DELETE FROM posts WHERE postId = ?`,
+        req.params.id,
+        (err, result) => {
+          if (err) {
+            return res
+              .status(400)
+              .json({ message: "Suppression échoué  " + err });
+          } else {
+            res.status(200).json({ message: "post supprimé" });
+          }
+        }
+      );
     }
   );
 };

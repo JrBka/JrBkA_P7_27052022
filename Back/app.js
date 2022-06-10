@@ -48,6 +48,7 @@ app.use(
   express.static(path.join(__dirname, "images/profil"))
 );
 app.use("/images/posts", express.static(path.join(__dirname, "images/posts")));
+
 app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
 

@@ -19,7 +19,7 @@ module.exports.getUserId = (req, res, next) => {
             //res.local = info de l'utilisateur en transit accessible uniquement depuis le back
             console.log("token invalide");
             res.locals.user = null;
-            res.cookie("token", "", { maxAge: 1000 });
+            res.cookie("token", "", { maxAge: -1 });
           } else {
             db.query(
               `SELECT * FROM users WHERE id = ?`,

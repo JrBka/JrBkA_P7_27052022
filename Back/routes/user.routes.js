@@ -10,8 +10,8 @@ router.post("/login", authController.login);
 router.get("/logout", auth.auth, authController.logout);
 
 //user
-router.get("/", auth.auth, userController.getAllUsers);
-router.get("/:id", auth.auth, userController.getOneUser);
+router.get("/", auth.auth, userController.getUsers);
+router.get("/:id", auth.auth, userController.getUser);
 router.put("/:id", auth.auth, multer, userController.modifyUser);
 router.delete("/:id", auth.auth, userController.deleteUser);
 

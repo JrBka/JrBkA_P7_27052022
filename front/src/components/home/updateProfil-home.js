@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { idContext } from "../appContext";
+import logColor from "../../style/color-style";
+import FormData, { _boundary } from "form-data";
 
 const ImgProfil = styled.img`
   width: 80px;
@@ -10,44 +12,62 @@ const ImgProfil = styled.img`
   overflow: hidden;
 `;
 
+const DivError = styled.div`
+  color: ${logColor.primary};
+`;
+
+let newPseudo = null;
+let newEmail = null;
+let newBio = null;
+let newPhoto = null;
+let newPassword = null;
+
 function UpdateProfil() {
   const id = useContext(idContext);
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [photo, setPhoto] = useState("");
-  const [newPseudo, setNewPseudo] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newBio, setNewBio] = useState("");
-  const [newPhoto, setNewPhoto] = useState("");
 
-  useEffect(() => {
-    axios({
-      method: "get",
-      url: `http://localhost:5000/api/user/${id}`,
-      withCredentials: true,
-    }).then((data) => {
-      setPseudo(data.data.pseudo);
-      setEmail(data.data.email);
-      setBio(data.data.bio);
-      setPhoto(data.data.photo);
-    });
+  axios({
+    method: "get",
+    url: `http://localhost:5000/api/user/${id}`,
+    withCredentials: true,
+  }).then((data) => {
+    setPseudo(data.data.pseudo);
+    setEmail(data.data.email);
+    setBio(data.data.bio);
+    setPhoto(data.data.photo);
   });
 
-  const updatePseudo = (e) => {
+  const updateProfil = (e) => {
     e.preventDefault();
+    if (
+      newPseudo == null &&
+      newBio == null &&
+      newEmail == null &&
+      newPassword == null &&
+      newPhoto == null
+    ) {
+      const error = document.getElementById("error");
+      return (error.innerHTML = "<p>Veuillez modifiez un élément</p>");
+    }
+    const bodyFormData = new FormData();
+    bodyFormData.append("id", id);
+    //bodyFormData.append("pseudo", newPseudo);
+    bodyFormData.append("image", newPhoto);
     axios({
       method: "put",
       url: `http://localhost:5000/api/user/${id}`,
       withCredentials: true,
-      data: {
-        id,
-        pseudo: newPseudo,
+      data: bodyFormData,
+      headers: {
+        "Content-Type": `multipart/form-data, boundary${bodyFormData._boundary}`,
       },
     })
       .then((data) => {
-        console.log(data.data);
-        console.log(newPseudo);
+        console.log(data);
+        console.log(newPhoto);
         alert("Modification réussi");
         window.location = "/home";
       })
@@ -56,69 +76,17 @@ function UpdateProfil() {
       });
   };
 
-  const updateEmail = (e) => {
-    e.preventDefault();
-
+  const deleteUser = () => {
     axios({
-      method: "put",
+      method: "delete",
       url: `http://localhost:5000/api/user/${id}`,
       withCredentials: true,
-      data: {
-        id,
-        email: newEmail,
-      },
     })
       .then((data) => {
-        console.log(data.data);
-        console.log(newPseudo);
-        alert("Modification réussi");
-        window.location = "/home";
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+        console.log(data);
 
-  const updateBio = (e) => {
-    e.preventDefault();
-
-    axios({
-      method: "put",
-      url: `http://localhost:5000/api/user/${id}`,
-      withCredentials: true,
-      data: {
-        id,
-        bio: newBio,
-      },
-    })
-      .then((data) => {
-        console.log(data.data);
-        console.log(newPseudo);
-        alert("Modification réussi");
-        window.location = "/home";
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const updatePhoto = (e) => {
-    e.preventDefault();
-
-    axios({
-      method: "put",
-      url: `http://localhost:5000/api/user/${id}`,
-      withCredentials: true,
-      data: {
-        id,
-        photo: newPhoto,
-      },
-    })
-      .then((data) => {
-        console.log(data.data);
-        console.log(newPseudo);
-        alert("Modification réussi");
-        window.location = "/home";
+        alert("Utilisateur supprimé");
+        window.location = "/";
       })
       .catch((error) => {
         console.log(error);
@@ -127,51 +95,61 @@ function UpdateProfil() {
 
   return (
     <div>
-      <div>
-        <p>pseudo: {pseudo}</p>
-        <form action="" onSubmit={updatePseudo}>
+      <form action="" onSubmit={updateProfil}>
+        <div>
+          <p>pseudo: {pseudo}</p>
           <input
+            id="newPseudo"
             type="text"
             placeholder="modifier votre pseudo"
-            onChange={(e) => setNewPseudo(e.target.value)}
+            onChange={(e) => (newPseudo = e.target.value)}
           />
-          <input type="submit" value="modifier" />
-        </form>
-      </div>
-      <div>
-        <p>email: {email}</p>
-        <form action="" onSubmit={updateEmail}>
+        </div>
+        <div>
+          <p>email: {email}</p>
           <input
             type="email"
             placeholder="modifier votre email"
-            onChange={(e) => setNewEmail(e.target.value)}
+            onChange={(e) => (newEmail = e.target.value)}
           />
-          <input type="submit" value="modifier" />
-        </form>
-      </div>
-      <div>
-        <p>bio: {bio}</p>
-        <form action="" onSubmit={updateBio}>
+        </div>
+        <div>
+          <p>password: </p>
+          <input
+            type="password"
+            placeholder="modifier votre password"
+            onChange={(e) => (newPassword = e.target.value)}
+          />
+        </div>
+        <div>
+          <p>bio: {bio}</p>
+
           <textarea
             type="text"
             placeholder="modifier votre bio"
-            onChange={(e) => setNewBio(e.target.value)}
+            onChange={(e) => (newBio = e.target.value)}
           />
-          <input type="submit" value="modifier" />
-        </form>
-      </div>
-      <div>
-        photo de profil:
-        <ImgProfil src={photo} alt="photo de profil" />
-        <form action="" onSubmit={updatePhoto}>
+        </div>
+        <div>
+          <p>photo de profil:</p>
+          <ImgProfil src={photo} alt="photo de profil" />
+          <br />
+
           <input
-            type="text"
-            placeholder="modifier l'url de la photo"
-            onChange={(e) => setNewPhoto(e.target.value)}
+            id=" photoProfil"
+            name="photoProfil"
+            type="file"
+            accept="image/*"
+            onChange={(e) => (newPhoto = e.target.value)}
           />
-          <input type="submit" value="modifier" />
-        </form>
-      </div>
+        </div>
+        <br />
+        <DivError id="error"></DivError>
+
+        <input id="button-updateProfil" type="submit" value="modifier" />
+      </form>
+      <br />
+      <input type="submit" value="Supprimer ce compte" onClick={deleteUser} />
     </div>
   );
 }
