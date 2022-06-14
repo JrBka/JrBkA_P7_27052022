@@ -10,7 +10,7 @@ module.exports.createComment = (req, res) => {
       } else {
         db.query(
           `SELECT * FROM comments WHERE text LIKE = ? AND postId = ? AND posterId = ? `[
-            (req.body.texte, req.body.postId, req.body.posterId)
+            (req.body.text, req.body.postId, req.body.posterId)
           ],
           (err, resultat) => {
             res.status(201).json({
@@ -43,13 +43,13 @@ module.exports.getComments = (req, res) => {
 module.exports.getComment = (req, res) => {
   try {
     db.query(
-      `SELECT posterId, text FROM comments WHERE id = ?`,
+      `SELECT * FROM comments WHERE postId = ?`,
       req.params.id,
       (err, result) => {
         if (!result[0]) {
           res.status(400).json({ message: "Commentaire introuvable" });
         } else {
-          res.status(200).json(result[0]);
+          res.status(200).json(result);
         }
       }
     );

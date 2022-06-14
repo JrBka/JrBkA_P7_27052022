@@ -17,7 +17,9 @@ function UsersPage() {
           "display:flex;" +
           "justify-content: space-around;" +
           "align-items:center;" +
-          "height:100px;";
+          "height:100px;" +
+          "cursor: pointer;";
+
         const userPseudo = document.createElement("p");
         userPseudo.style = "width:20%;" + "margin:0;" + "border-bottom:0px;";
         const userEmail = document.createElement("p");
@@ -46,6 +48,7 @@ function UsersPage() {
       });
     });
   });
+
   return <div id="usersContent"></div>;
 }
 

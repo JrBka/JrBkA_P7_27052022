@@ -14,7 +14,7 @@ const App = () => {
     }).then((data) => {
       setUserId(data.data.userId);
     });
-  });
+  }, []);
 
   return (
     <idContext.Provider value={userId}>

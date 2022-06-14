@@ -37,7 +37,7 @@ const limiter = rateLimit({
 });
 
 //plugin
-app.use(limiter);
+app.post(limiter);
 app.use(express.json());
 app.use(cookieParser());
 

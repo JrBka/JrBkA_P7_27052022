@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { idContext } from "../appContext";
 import logColor from "../../style/color-style";
-import FormData, { _boundary } from "form-data";
+import FormData from "form-data";
 
 const ImgProfil = styled.img`
   width: 80px;
@@ -54,8 +54,21 @@ function UpdateProfil() {
     }
     const bodyFormData = new FormData();
     bodyFormData.append("id", id);
-    //bodyFormData.append("pseudo", newPseudo);
-    bodyFormData.append("image", newPhoto);
+    if (newPseudo != null) {
+      bodyFormData.append("pseudo", newPseudo);
+    }
+    if (newPassword != null) {
+      bodyFormData.append("password", newPassword);
+    }
+    if (newEmail != null) {
+      bodyFormData.append("email", newEmail);
+    }
+    if (newBio != null) {
+      bodyFormData.append("bio", newBio);
+    }
+    if (newPhoto != null) {
+      bodyFormData.append("image", newPhoto[0]);
+    }
     axios({
       method: "put",
       url: `http://localhost:5000/api/user/${id}`,
@@ -67,7 +80,6 @@ function UpdateProfil() {
     })
       .then((data) => {
         console.log(data);
-        console.log(newPhoto);
         alert("Modification réussi");
         window.location = "/home";
       })
@@ -140,7 +152,7 @@ function UpdateProfil() {
             name="photoProfil"
             type="file"
             accept="image/*"
-            onChange={(e) => (newPhoto = e.target.value)}
+            onChange={(e) => (newPhoto = e.target.files)}
           />
         </div>
         <br />
