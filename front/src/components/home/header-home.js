@@ -98,7 +98,7 @@ function Headers() {
     }).then((data) => {
       setImg(data.data.photo);
     });
-  }, []);
+  });
 
   const handlePage = (e) => {
     if (e.target.id === "logout") {

@@ -1,5 +1,6 @@
 import axios from "axios";
-import React, { useEffect } from "react";
+import FormData from "form-data";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import logColor from "../../style/color-style";
 import { idContext } from "../appContext";
@@ -9,12 +10,25 @@ const PageContent = styled.div`
   flex-direction: column;
   align-items: center;
 `;
-var comment = "";
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+let comment = "";
+let postText = null;
+let postPhoto = null;
+const PosterId = [];
 
 function PostPage() {
+  PosterId.push(useContext(idContext));
+
   useEffect(() => {
     //////////////////// Posts ///////////////////////////
     //requête posts
+
     axios({
       method: "get",
       url: `http://localhost:5000/api/post/`,
@@ -23,6 +37,7 @@ function PostPage() {
       .then((data) => {
         data.data.forEach((element) => {
           //requête user pour obtenir le pseudo de l'utilisateur qui à fait le post
+
           axios({
             method: "get",
             url: `http://localhost:5000/api/user/${element.posterId}`,
@@ -40,7 +55,7 @@ function PostPage() {
                 "flex-direction: column;" +
                 "align-items:center;" +
                 "text-align: center;" +
-                "min-height:300px;" +
+                "min-height:100px;" +
                 "width: 70%;" +
                 "margin-top: 20px;";
 
@@ -72,13 +87,17 @@ function PostPage() {
               postsContent.appendChild(postContent);
               postContent.appendChild(posterContent);
               posterContent.appendChild(posterId);
-              postContent.appendChild(postPhoto);
+              if (element.photo) {
+                postContent.appendChild(postPhoto);
+              }
               postContent.appendChild(postTexte);
               postContent.appendChild(buttonComments);
               postContent.appendChild(commentsContent);
 
               posterId.innerHTML = `Posté par : ${dataUser.data.pseudo}`;
-              postPhoto.innerHTML = `<img  src="${element.photo}" alt="photo de profil" /> `;
+              if (element.photo) {
+                postPhoto.innerHTML = `<img  src="${element.photo}" alt="photo de profil" /> `;
+              }
 
               postTexte.innerHTML = ` ${element.texte} `;
 
@@ -87,12 +106,15 @@ function PostPage() {
               ////////////////////  Commentaires  //////////////////////////
 
               const HandleComments = () => {
+                console.log(PosterId);
+
+                console.log("ok false");
                 const Error = document.createElement("div");
                 Error.style = `
                 color: ${logColor.primary}
                 `;
 
-                const form = document.createElement("form");
+                let form = document.createElement("form");
                 form.style = `
                 display: flex;
                 flex-direction: column;
@@ -102,7 +124,7 @@ function PostPage() {
                 form.onsubmit = (e) => {
                   PostComment(e);
                 };
-                const addComment = document.createElement("textarea");
+                let addComment = document.createElement("textarea");
                 addComment.style = `
                 width:80%;
                 height: 100px;
@@ -112,7 +134,7 @@ function PostPage() {
                   comment = e.target.value;
                 };
 
-                const buttonAddComment = document.createElement("input");
+                let buttonAddComment = document.createElement("input");
                 buttonAddComment.type = "submit";
                 buttonAddComment.value = " Commenter";
                 buttonAddComment.style = `
@@ -132,7 +154,6 @@ function PostPage() {
                   withCredentials: true,
                 })
                   .then((data) => {
-                    console.log(data);
                     data.data.forEach((el) => {
                       //requête user avec l'id de l'utilisateur qui a poster le commentaire
                       axios({
@@ -164,32 +185,40 @@ function PostPage() {
                     Error.innerHTML = "Aucun commentaire sur ce post";
                     console.log(error);
                   });
-              };
 
-              /////////////////////////////////////////////////////////////////
+                ////////////////////  Poster un commentaire /////////////////////
 
-              ////////////////////  Poster un commentaire /////////////////////
+                const PostComment = (e) => {
+                  e.preventDefault();
 
-              const PostComment = (e) => {
-                e.preventDefault();
+                  console.log(PosterId[1]);
+                  console.log("début postcomment");
+                  console.log(element.postId);
+                  console.log(comment);
+                  try {
+                    axios({
+                      method: "post",
+                      url: `http://localhost:5000/api/post/comment/`,
+                      withCredentials: true,
+                      data: {
+                        posterId: PosterId[1],
+                        postId: element.postId,
+                        text: comment,
+                      },
+                    })
+                      .then((data) => {
+                        return console.log(data);
+                      })
+                      .catch((error) => {
+                        return console.log(error);
+                      });
+                  } catch (error) {
+                    console.log(error);
+                  }
+                  console.log("fin de postcomment");
+                };
 
-                console.log(element.postId);
-                axios({
-                  method: "post",
-                  url: `http://localhost:5000/api/post/comment/`,
-                  withCredentials: true,
-                  data: {
-                    posterId: idContext,
-                    postId: element.postId,
-                    text: comment,
-                  },
-                })
-                  .then((data) => {
-                    return console.log(data);
-                  })
-                  .catch((error) => {
-                    return console.log(error);
-                  });
+                /////////////////////////////////////////////////////////////////
               };
 
               /////////////////////////////////////////////////////////////////
@@ -202,9 +231,68 @@ function PostPage() {
       .catch((error) => {
         console.log(error);
       });
+    //////////////////////////////Post///////////////////////////////
+
     console.log("fin");
   }, []);
-  return <PageContent id="postsContent"></PageContent>;
+  const Post = (e) => {
+    e.preventDefault();
+    try {
+      const postError = document.getElementById("postError");
+      if (postText == null && postPhoto == null) {
+        return (postError.innerHTML = `<p style="color :${logColor.primary}">Veuillez ajouter du texte ou une image</p>`);
+      }
+      let bodyFormData = new FormData();
+      bodyFormData.append("posterId", PosterId[1]);
+      if (postText != null) {
+        bodyFormData.append("texte", postText);
+      }
+      if (postPhoto != null) {
+        bodyFormData.append("image", postPhoto[0]);
+      }
+      console.log(postText);
+      axios({
+        method: "post",
+        url: `http://localhost:5000/api/post/`,
+        withCredentials: true,
+        data: bodyFormData,
+        headers: {
+          "Content-Type": `multipart/form-data, boundary${bodyFormData._boundary}`,
+        },
+      })
+        .then((data) => {
+          return console.log(data);
+        })
+        .catch((error) => {
+          return console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /////////////////////////////////////////////////////////////////
+  return (
+    <PageContent id="postsContent">
+      <div>
+        <Form
+          onSubmit={(e) => {
+            Post(e);
+          }}
+        >
+          <label>Post</label>
+          <textarea
+            onChange={(e) => {
+              postText = e.target.value;
+            }}
+          />
+          <input type="file" onClick={(e) => (postPhoto = e.target.files)} />
+          <div id="postError"></div>
+          <input type="submit" />
+        </Form>
+      </div>
+    </PageContent>
+  );
 }
 
 export default PostPage;
