@@ -126,9 +126,21 @@ module.exports.deletePost = (req, res) => {
           if (err) {
             return res
               .status(400)
-              .json({ message: "Suppression échoué  " + err });
+              .json({ message: "Suppression du post échoué  " + err });
+          }
+        }
+      );
+      db.query(
+        `DELETE FROM comments WHERE postId = ?`,
+        req.params.id,
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              message:
+                "Suppression des commentaires liés au post échoué  " + err,
+            });
           } else {
-            res.status(200).json({ message: "post supprimé" });
+            res.status(200).json({ message: "Post et commentaires supprimé" });
           }
         }
       );

@@ -4,6 +4,7 @@ const db = dbConfig.connectDb();
 module.exports.createComment = (req, res) => {
   try {
     const newComment = { ...req.body };
+    console.log(newComment);
     db.query(`INSERT INTO comments SET ?`, newComment, (err, result) => {
       if (err) {
         res.status(400).json({ message: "Post invalide  " + err });
@@ -60,20 +61,22 @@ module.exports.getComment = (req, res) => {
 
 module.exports.modifyComment = (req, res) => {
   try {
-    const post = { ...req.body };
+    console.log(req.body);
+    console.log(req.cookies.token.id);
+    if (req.body.posterId != req.cookies.token.id) {
+      return res.status(400).json({ message: "reqête non autorisé" });
+    }
     db.query(
-      `UPDATE comments SET ? WHERE id = ? AND posterId = ? AND postId = ? `,
-      [post, req.params.id, req.body.posterId, req.postId],
+      `UPDATE comments SET text = ? WHERE id = ? AND posterId = ? AND postId = ? `,
+      [req.body.text, req.params.id, req.body.posterId, req.body.postId],
       (err, result) => {
+        if (err) {
+          return res.status(400).json({ message: err });
+        }
         if (!result) {
           return res.status(400).json({ message: "Commentaire introuvable" });
-        }
-        if (req.body.posterId == req.cookies.token.id) {
-          res.status(200).json({ message: "Commentaire modifié" });
         } else {
-          return res
-            .status(400)
-            .json({ message: "Problème modification  " + err });
+          res.status(200).json({ message: "Commentaire modifié : " + result });
         }
       }
     );
