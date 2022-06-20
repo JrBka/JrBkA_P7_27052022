@@ -14,6 +14,7 @@ router.delete("/:id", auth.auth, postController.deletePost);
 //like/unlike
 router.post("/like/:id", auth.auth, likeController.likeUnlike);
 router.get("/like/:id", auth.auth, likeController.numbersOflike);
+router.get("/likers/:id", auth.auth, likeController.likers);
 
 //comments
 router.post("/comment", auth.auth, commentController.createComment);

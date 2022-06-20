@@ -3,15 +3,14 @@ const db = dbConfig.connectDb();
 
 module.exports.likeUnlike = (req, res) => {
   try {
-    const like = { ...req.body };
     db.query(
       `SELECT * FROM likes WHERE postId = ? AND likerId = ?`,
-      [req.params.id, like.likerId],
+      [req.params.id, req.body.likerId],
       (err, result) => {
         if (!result[0]) {
           db.query(
             `INSERT INTO likes (likerId, postId) VALUES (?, ?)`,
-            [like.likerId, req.params.id],
+            [req.body.likerId, req.params.id],
             (err, result) => {
               if (err) {
                 res.status(400).json({ message: err });
@@ -23,7 +22,7 @@ module.exports.likeUnlike = (req, res) => {
         } else {
           db.query(
             `DELETE FROM likes WHERE postId = ? AND likerId = ?`,
-            [req.params.id, like.likerId],
+            [req.params.id, req.body.likerId],
             (err, result) => {
               if (err) {
                 res.status(400).json({ message: err });
@@ -48,7 +47,21 @@ module.exports.numbersOflike = (req, res) => {
       if (!result[0]) {
         res.status(200).json(0);
       } else {
-        res.status(200).json(result[0]);
+        res.status(200).json(Object.values(result[0]));
+      }
+    }
+  );
+};
+
+module.exports.likers = (req, res) => {
+  db.query(
+    `SELECT * FROM likes WHERE postId = ? `,
+    req.params.id,
+    (err, result) => {
+      if (!result[0]) {
+        res.status(200).json(err);
+      } else {
+        res.status(200).json(result);
       }
     }
   );
