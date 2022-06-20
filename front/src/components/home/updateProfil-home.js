@@ -29,18 +29,22 @@ function UpdateProfil() {
   const [bio, setBio] = useState("");
   const [photo, setPhoto] = useState("");
 
-  axios({
-    method: "get",
-    url: `http://localhost:5000/api/user/${id}`,
-    withCredentials: true,
-  }).then((data) => {
-    setPseudo(data.data.pseudo);
-    setEmail(data.data.email);
-    setBio(data.data.bio);
-    setPhoto(data.data.photo);
-  });
-
-  const updateProfil = (e) => {
+  const GetProfil = () => {
+    useEffect(() => {
+      axios({
+        method: "get",
+        url: `http://localhost:5000/api/user/${id}`,
+        withCredentials: true,
+      }).then((data) => {
+        setPseudo(data.data.pseudo);
+        setEmail(data.data.email);
+        setBio(data.data.bio);
+        setPhoto(data.data.photo);
+      });
+    });
+  };
+  GetProfil();
+  const UpdateProfil = (e) => {
     e.preventDefault();
     if (
       newPseudo == null &&
@@ -81,7 +85,10 @@ function UpdateProfil() {
       .then((data) => {
         console.log(data);
         alert("Modification réussi");
-        window.location = "/home";
+        setPseudo(newPseudo);
+        setEmail(newEmail);
+        setBio(newBio);
+        setPhoto(newPhoto);
       })
       .catch((error) => {
         console.log(error);
@@ -107,7 +114,7 @@ function UpdateProfil() {
 
   return (
     <div>
-      <form action="" onSubmit={updateProfil}>
+      <form action="" onSubmit={UpdateProfil}>
         <div>
           <p>pseudo: {pseudo}</p>
           <input
