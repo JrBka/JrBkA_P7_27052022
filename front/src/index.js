@@ -1,15 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import color from "./style/color-style";
 
 import App from "./App";
 import styled from "styled-components";
+import logColor from "./style/color-style";
 
 const GlobalStyle = styled.div`
   font-family: Lato, sans-serif;
-  margin: 10px;
-  color: ${color.tertiary};
+  margin: auto;
+  color: ${logColor.tertiary};
   min-width: 300px;
+  max-width: 1080px;
+  width: 90vw;
 `;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

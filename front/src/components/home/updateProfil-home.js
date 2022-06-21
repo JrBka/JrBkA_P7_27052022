@@ -5,6 +5,19 @@ import { idContext } from "../appContext";
 import logColor from "../../style/color-style";
 import FormData from "form-data";
 
+const Div = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  margin: auto;
+`;
+
+const DivInput = styled.div`
+  margin-left: 20px;
+`;
+
 const ImgProfil = styled.img`
   width: 80px;
   height: 80px;
@@ -14,6 +27,25 @@ const ImgProfil = styled.img`
 
 const DivError = styled.div`
   color: ${logColor.primary};
+`;
+
+const Span = styled.span`
+  font-weight: bold;
+`;
+
+const P = styled.p`
+  width: 100%;
+`;
+
+const Input = styled.input`
+  margin: 20px;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  border: 2px solid ${logColor.tertiary};
+  margin-top: 30px;
 `;
 
 let newPseudo = null;
@@ -113,44 +145,59 @@ function UpdateProfil() {
   };
 
   return (
-    <div>
-      <form action="" onSubmit={UpdateProfil}>
-        <div>
-          <p>pseudo: {pseudo}</p>
+    <Div>
+      <Form action="" onSubmit={UpdateProfil}>
+        <DivInput>
+          <P>
+            <Span>Pseudo : </Span>
+            {pseudo}
+          </P>
+
           <input
             id="newPseudo"
             type="text"
-            placeholder="modifier votre pseudo"
+            placeholder="Modifier votre pseudo"
             onChange={(e) => (newPseudo = e.target.value)}
           />
-        </div>
-        <div>
-          <p>email: {email}</p>
+        </DivInput>
+        <DivInput>
+          <P>
+            <Span>Email : </Span>
+            {email}
+          </P>
           <input
             type="email"
-            placeholder="modifier votre email"
+            placeholder="Modifier votre email"
             onChange={(e) => (newEmail = e.target.value)}
           />
-        </div>
-        <div>
-          <p>password: </p>
+        </DivInput>
+        <DivInput>
+          <P>
+            <Span>Password : </Span>
+          </P>
           <input
             type="password"
-            placeholder="modifier votre password"
+            placeholder="Modifier votre password"
             onChange={(e) => (newPassword = e.target.value)}
           />
-        </div>
-        <div>
-          <p>bio: {bio}</p>
+        </DivInput>
+        <DivInput>
+          <P>
+            <Span>Bio : </Span>
+            {bio}
+          </P>
 
           <textarea
             type="text"
-            placeholder="modifier votre bio"
+            placeholder="Modifier votre bio"
             onChange={(e) => (newBio = e.target.value)}
           />
-        </div>
-        <div>
-          <p>photo de profil:</p>
+        </DivInput>
+        <DivInput>
+          <P>
+            <Span>Photo de profil: </Span>
+            {pseudo}
+          </P>
           <ImgProfil src={photo} alt="photo de profil" />
           <br />
 
@@ -161,15 +208,18 @@ function UpdateProfil() {
             accept="image/*"
             onChange={(e) => (newPhoto = e.target.files)}
           />
-        </div>
+        </DivInput>
         <br />
         <DivError id="error"></DivError>
 
-        <input id="button-updateProfil" type="submit" value="modifier" />
-      </form>
+        <Input id="button-updateProfil" type="submit" value="Modifier Profil" />
+      </Form>
       <br />
-      <input type="submit" value="Supprimer ce compte" onClick={deleteUser} />
-    </div>
+      <br />
+      <div>
+        <Input type="submit" value="Supprimer ce compte" onClick={deleteUser} />
+      </div>
+    </Div>
   );
 }
 
