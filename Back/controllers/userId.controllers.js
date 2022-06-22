@@ -7,8 +7,7 @@ module.exports.getUserId = (req, res, next) => {
   try {
     const token = req.cookies.token.token;
     if (!token) {
-      console.log("ok");
-      window.loation = "http://localhost:3000/";
+      window.location = "http://localhost:3000/";
     }
     if (token) {
       jsonwebtoken.verify(

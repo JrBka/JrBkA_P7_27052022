@@ -1,5 +1,6 @@
 import axios from "axios";
 
+//déconnexion
 function Logout() {
   axios({
     method: "get",

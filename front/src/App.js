@@ -6,6 +6,7 @@ import axios from "axios";
 const App = () => {
   const [userId, setUserId] = useState("");
 
+  // Vérifie le token à chaque action et renvoi l'userId
   useEffect(() => {
     axios({
       method: "get",

@@ -5,6 +5,7 @@ import logColors from "../../style/color-style";
 import styled from "styled-components";
 import image from "../../logo/icon-modif.png";
 
+// composant stylisé
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -54,12 +55,14 @@ const Image = styled.img`
   height: 100%;
 `;
 function Log() {
+  // state
   const [signupModal, setSignupModal] = useState(false);
   const [loginModal, setLoginModal] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pseudo, setPseudo] = useState("");
 
+  // Affiche le formulaire d'inscription ou de connexion
   const handleModals = (e) => {
     if (e.target.id === "signup") {
       setSignupModal(true);

@@ -3,6 +3,8 @@ import Axios from "axios";
 import styled from "styled-components";
 import color from "../../style/color-style";
 
+// composant stylisé
+
 const Modal = styled.div`
   display: flex;
   flex-direction: column;
@@ -29,6 +31,7 @@ const ErrorColor = styled.p`
   color: ${color.primary};
 `;
 
+// inscription dans l'application
 function Signup({ pseudo, setPseudo, email, setEmail, password, setPassword }) {
   const handleSignup = (e) => {
     const pseudoError = document.getElementById("pseudoError");
@@ -53,6 +56,7 @@ function Signup({ pseudo, setPseudo, email, setEmail, password, setPassword }) {
       .catch((error) => {
         const errors = error.response.data;
 
+        // gestion des messages d'erreurs
         if (
           errors.message === "Pseudo déjà utilisé" ||
           errors.error === "Pseudo invalide"
@@ -83,43 +87,43 @@ function Signup({ pseudo, setPseudo, email, setEmail, password, setPassword }) {
     <Modal>
       <h1>Inscription</h1>
       <br />
-      <label htmlFor="pseudo">Pseudo</label>
-      <br />
-      <input
-        type="text"
-        name="pseudo"
-        id="pseudo"
-        placeholder="olivier155"
-        onChange={(e) => setPseudo(e.target.value)}
-      />
-      <ErrorColor id="pseudoError"></ErrorColor>
-      <br />
-      <br />
-      <label htmlFor="email">Email</label>
-      <br />
-      <input
-        type="email"
-        name="email"
-        id="email"
-        placeholder="olivier155@gmail.com"
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <ErrorColor id="emailError"></ErrorColor>
+      <form id="signup-form" onSubmit={handleSignup}>
+        <label htmlFor="pseudo">Pseudo</label>
+        <br />
+        <input
+          type="text"
+          name="pseudo"
+          id="pseudo"
+          placeholder="olivier155"
+          onChange={(e) => setPseudo(e.target.value)}
+        />
+        <ErrorColor id="pseudoError"></ErrorColor>
+        <br />
+        <br />
+        <label htmlFor="email">Email</label>
+        <br />
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="olivier155@gmail.com"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <ErrorColor id="emailError"></ErrorColor>
 
-      <br />
-      <br />
-      <label htmlFor="password">Mot de passe</label>
-      <br />
-      <input
-        type="password"
-        name="password"
-        id="password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <ErrorColor id="passwordError"></ErrorColor>
-      <br />
+        <br />
+        <br />
+        <label htmlFor="password">Mot de passe</label>
+        <br />
+        <input
+          type="password"
+          name="password"
+          id="password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <ErrorColor id="passwordError"></ErrorColor>
+        <br />
 
-      <form id="signup-form" action="" onSubmit={handleSignup}>
         <br />
         <Button type="submit" value="S'inscrire" />
       </form>

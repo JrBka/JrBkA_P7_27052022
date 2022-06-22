@@ -5,6 +5,8 @@ import styled from "styled-components";
 import logColor from "../../style/color-style";
 import { idContext } from "../appContext";
 
+//composant stylisé
+
 const PageContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -31,9 +33,9 @@ let postPhoto = null;
 let updateText = null;
 let updateImage = null;
 let updateTextComment = null;
-
 let PosterId = "";
 
+//fonction de tri par ordre décroissant
 const sortPost = (a, b) => {
   if (a.postId < b.postId) {
     return +1;
@@ -54,63 +56,103 @@ const sortComment = (a, b) => {
     return 0;
   }
 };
+
 function PostPage() {
   PosterId = useContext(idContext);
 
   useEffect(() => {
-    //////////////////// Posts ///////////////////////////
-    //requête posts
+    /////////////////////////// Posts ///////////////////////////
 
+    /////////////////////////// Créer un post ///////////////////////////
+
+    //recherche d'élément dans le DOM
     const postsContent = document.getElementById("postsContent");
     const divPost = document.getElementById("divPost");
+
+    //création d'élément dans le DOM
     const postForm = document.createElement("form");
     postForm.style = `
-                        margin-top: 20px;
-                        margin-bottom: 40px;
-                        padding-top: 10px;
-                        width: 70%;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        border: 1px solid ${logColor.primary};
-                        border-radius: 20px;
-                        `;
+      margin-top: 20px;
+      margin-bottom: 40px;
+      padding-top: 10px;
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid ${logColor.primary};
+      border-radius: 20px;
+    `;
     postForm.onsubmit = (e) => {
       Post(e);
     };
-    const postLabel = document.createElement("label");
-    postLabel.innerHTML = "Postez ici !";
-    const postTextarea = document.createElement("textarea");
-    postTextarea.style = `
-                        height: 100px;
-                        width: 80%;
-                        margin: 10px;
-                        `;
 
+    const postLabel = document.createElement("label");
+    postLabel.htmlFor = "postTextarea";
+    postLabel.innerHTML = "<strong>Postez ici !</strong>";
+
+    const postTextarea = document.createElement("textarea");
+    postTextarea.id = "postTextarea";
+    postTextarea.name = "postTextarea";
+    postTextarea.style = `
+      height: 100px;
+      width: 80%;
+      margin: 10px;`;
     postTextarea.onchange = (e) => {
       postText = e.target.value;
     };
-
     postTextarea.placeholder = "Ecrivez votre post ici !";
+
     const postError = document.createElement("div");
+
+    const postFilesLabel = document.createElement("label");
+    postFilesLabel.htmlFor = "postFiles";
+    postFilesLabel.innerHTML = "Selectionner un fichier à télécharger";
+    postFilesLabel.style = `
+    text-decoration: underline;
+    margin-bottom: 10px;
+    display: flex;
+    text-align: center;
+    `;
+    postFilesLabel.onmouseenter = () => {
+      postFilesLabel.style = `
+      color: ${logColor.primary};
+      cursor: pointer;
+      text-decoration: underline;
+      margin-bottom: 10px;
+      display: flex;
+      text-align: center;
+      `;
+    };
+    postFilesLabel.onmouseleave = () => {
+      postFilesLabel.style = `
+      color:${logColor.tertiary};
+      text-decoration: underline;
+      margin-bottom: 10px;
+      display: flex;
+      text-align: center;
+      `;
+    };
 
     const postFiles = document.createElement("input");
     postFiles.type = "file";
-    postFiles.id = "postFile";
+    postFiles.id = "postFiles";
+    postFiles.name = "postFiles";
     postFiles.style = `
-    width: 75px;
-    `;
+    display: none`;
     postFiles.onchange = (e) =>
       (postPhoto = e.target.files) &
-      (postFilesValue.innerHTML = postPhoto[0].name);
+      (postFilesValue.innerHTML = e.target.value.split("fakepath\\")[1]);
 
     const postFilesValue = document.createElement("div");
     postFilesValue.style = `
-    width:80%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    display: flex;
+    text-align: center;
+    `;
 
+    const postFilesError = document.createElement("div");
+    postFilesError.style = `
+    display: flex;
+    text-align: center;
     `;
 
     const buttonPost = document.createElement("input");
@@ -118,18 +160,20 @@ function PostPage() {
     buttonPost.style = `
       margin-top:30px;
       margin-bottom: 15px`;
-
     buttonPost.value = `Poster !`;
 
+    //insertion d'élément dans le DOM
     divPost.appendChild(postForm);
     postForm.appendChild(postLabel);
     postForm.appendChild(postTextarea);
     postForm.appendChild(postError);
+    postForm.appendChild(postFilesLabel);
     postForm.appendChild(postFiles);
     postForm.appendChild(postFilesValue);
+    postForm.appendChild(postFilesError);
     postForm.appendChild(buttonPost);
 
-    //////////////////////////////Post///////////////////////////////
+    //Envoyer le post
     const Post = (e) => {
       e.preventDefault();
 
@@ -165,7 +209,6 @@ function PostPage() {
             }
             if (postPhoto != null) {
               postPhoto = null;
-              postFilesValue.innerHTML = "";
             }
             postsContent.innerHTML = "";
 
@@ -179,8 +222,7 @@ function PostPage() {
       }
     };
 
-    /////////////////////////////////////////////////////////////////
-
+    /////////////////////////// Afficher les posts ///////////////////////////
     const GetPost = () => {
       axios({
         method: "get",
@@ -188,8 +230,8 @@ function PostPage() {
         withCredentials: true,
       })
         .then((data) => {
+          //tri des posts
           let dataSort = data.data.sort(sortPost);
-
           dataSort.forEach((element) => {
             axios({
               method: "get",
@@ -197,7 +239,7 @@ function PostPage() {
               withCredentials: true,
             })
               .then((dataLike) => {
-                //requête user pour obtenir le pseudo de l'utilisateur qui à fait le post
+                //requête pour obtenir le pseudo de l'utilisateur qui à fait le post
                 axios({
                   method: "get",
                   url: `http://localhost:5000/api/user/${element.posterId}`,
@@ -210,8 +252,8 @@ function PostPage() {
                       withCredentials: true,
                     })
                       .then((dataLikers) => {
+                        // création d'élément dans le DOM
                         const postContent = document.createElement("div");
-
                         postContent.style =
                           `border: 1px solid ${logColor.primary};` +
                           "border-radius: 20px;" +
@@ -231,7 +273,9 @@ function PostPage() {
                           justify-content: space-around;
                           border-bottom: 1px solid ${logColor.secondary};
                           align-items: center;`;
+
                         const divPostUpdate = document.createElement("div");
+
                         const buttonUpdate = document.createElement("input");
                         buttonUpdate.type = "submit";
                         buttonUpdate.value = "modifier";
@@ -251,12 +295,16 @@ function PostPage() {
                         buttonDelete.style = `
                         margin:10px;
                         `;
+
                         const likesContent = document.createElement("div");
                         likesContent.style = `
                         display: flex;
                         align-items: center;
                         `;
+
                         const like = document.createElement("div");
+
+                        //Gestion bouton like
                         if (dataLikers.data) {
                           const userLiker = dataLikers.data.map(
                             (e) => e.likerId
@@ -319,7 +367,9 @@ function PostPage() {
                         height: 100%;
                         margin: 20px;
                         `;
+
                         postTexte.style = `width:100%; margin:20px;`;
+
                         const postPhoto = document.createElement("img");
                         postPhoto.style = `
                          max-height:100%;
@@ -333,9 +383,11 @@ function PostPage() {
                         buttonComments.onclick = () => {
                           HandleComments();
                         };
+
                         const commentsContent = document.createElement("div");
                         commentsContent.style = `width: 100%;`;
 
+                        //insertion d'éléments dans le DOM
                         postsContent.appendChild(postContent);
                         postContent.appendChild(posterContent);
                         if (PosterId === element.posterId) {
@@ -358,7 +410,11 @@ function PostPage() {
                         postContent.appendChild(buttonComments);
                         postContent.appendChild(commentsContent);
 
-                        posterName.innerHTML = `Posté par : ${dataUser.data.pseudo}`;
+                        if (dataUser.data.pseudo) {
+                          posterName.innerHTML = `Posté par : ${dataUser.data.pseudo}`;
+                        } else {
+                          posterName.innerHTML = `Posté par : un ancien utilisateur`;
+                        }
                         like.innerHTML = `<i class="fas fa-heart"></i>`;
 
                         numbersOfLikes.innerHTML = `${dataLike.data[0]}`;
@@ -370,9 +426,7 @@ function PostPage() {
                           postTexte.innerHTML = ` ${element.texte} `;
                         }
 
-                        //////////////////////////////////////////////////////////////
-
-                        ///////////////////////////////Like un post//////////////////////////////////////////////////////
+                        /////////////////////////// Liker un post ///////////////////////////
 
                         const handleLikes = () => {
                           axios({
@@ -381,39 +435,39 @@ function PostPage() {
                             withCredentials: true,
                             data: { likerId: PosterId },
                           })
-                            .then((data) => {
+                            .then((dataPostLike) => {
                               axios({
                                 method: "get",
                                 url: `http://localhost:5000/api/post/like/${element.postId}`,
                                 withCredentials: true,
                               })
-                                .then((x) => {
-                                  if (data.data.message === "Liké !") {
+                                .then((dataLike) => {
+                                  if (dataPostLike.data.message === "Liké !") {
                                     like.style = `
-                          font-size: 22px;
-                          -webkit-text-stroke-width: 1.2px
-                          transition: color 2s ease-in-out;
-                          background: -webkit-gradient(linear, left bottom, left top, from(${logColor.primary}), to(${logColor.secondary}));
-                          -webkit-background-clip: text;
-                          -webkit-text-fill-color: transparent;
-                          -webkit-text-stroke-color: ${logColor.tertiary};
-                          cursor: pointer;
-                          `;
+                                    font-size: 22px;
+                                    -webkit-text-stroke-width: 1.2px
+                                    transition: color 2s ease-in-out;
+                                    background: -webkit-gradient(linear, left bottom, left top, from(${logColor.primary}), to(${logColor.secondary}));
+                                    -webkit-background-clip: text;
+                                    -webkit-text-fill-color: transparent;
+                                    -webkit-text-stroke-color: ${logColor.tertiary};
+                                    cursor: pointer;
+                                    `;
 
-                                    numbersOfLikes.innerHTML = `${x.data[0]}`;
-                                    console.log(x.data[0]);
+                                    numbersOfLikes.innerHTML = `${dataLike.data[0]}`;
                                   }
-                                  if (data.data.message === "Unliké !") {
+                                  if (
+                                    dataPostLike.data.message === "Unliké !"
+                                  ) {
                                     like.style = `cursor: pointer;
-                          color: transparent;
-                          font-size: 20px;
-                          -webkit-text-stroke-width: 1.2px;
-                          -webkit-text-stroke-color: ${logColor.tertiary};
-                          font-weight: bold;`;
-                                    numbersOfLikes.innerHTML = `${x.data[0]}`;
-                                    console.log(x.data[0]);
+                                    color: transparent;
+                                    font-size: 20px;
+                                    -webkit-text-stroke-width: 1.2px;
+                                    -webkit-text-stroke-color: ${logColor.tertiary};
+                                    font-weight: bold;`;
+                                    numbersOfLikes.innerHTML = `${dataLike.data[0]}`;
                                   }
-                                  console.log(data.data.message);
+                                  console.log(dataPostLike.data.message);
                                 })
                                 .catch((error) => {
                                   return console.log(error);
@@ -424,13 +478,13 @@ function PostPage() {
                             });
                         };
 
-                        /////////////////////////////////////////////////////////////////////////////////////////////////
+                        /////////////////////////// Modifier un post ///////////////////////////
 
-                        ///////////////////////////////Modifier un post//////////////////////////////////////////////////
                         let postUpdateActiv = false;
 
                         const UpdatePost = () => {
                           if (postUpdateActiv === false) {
+                            //création d'éléments dans le DOM
                             const updateForm = document.createElement("form");
                             updateForm.onsubmit = (e) => {
                               Update(e);
@@ -442,48 +496,94 @@ function PostPage() {
                             width:100%;
                             margin:0;
                             `;
+
+                            const updateLabel = document.createElement("label");
+                            updateLabel.htmlFor = "updateTextarea";
+                            updateLabel.innerHTML = "Modifiez ici !";
+
                             const updateInput =
                               document.createElement("textarea");
+                            updateInput.id = "updateTextarea";
+                            updateInput.name = "updateTextarea";
                             updateInput.onchange = (e) => {
                               updateText = e.target.value;
                             };
                             updateInput.style = `
                             width:80%;
                             min-height: 75px;
+                            margin-top:10px;
+                            margin-bottom:10px;
                             `;
                             updateInput.placeholder = "Modifiez votre post !";
-                            const updatePhoto = document.createElement("input");
-                            updatePhoto.onchange = (e) =>
+
+                            const updateFilesLabel =
+                              document.createElement("label");
+                            updateFilesLabel.htmlFor = "updateFiles";
+                            updateFilesLabel.innerHTML =
+                              "Selectionnez un fichier à télécharger";
+                            updateFilesLabel.style = `
+                              text-decoration: underline;
+                              margin-bottom: 10px;
+                              display: flex;
+                              text-align: center;
+                              `;
+                            updateFilesLabel.onmouseenter = () => {
+                              updateFilesLabel.style = `
+                              color: ${logColor.primary};
+                              cursor: pointer;
+                              text-decoration: underline;
+                              margin-bottom: 10px;
+                              display: flex;
+                              text-align: center;
+                              `;
+                            };
+                            updateFilesLabel.onmouseleave = () => {
+                              updateFilesLabel.style = `
+                              color:${logColor.tertiary};
+                              text-decoration: underline;
+                              margin-bottom: 10px;
+                              display: flex;
+                              text-align: center;
+                              `;
+                            };
+
+                            const updateFiles = document.createElement("input");
+                            updateFiles.type = "file";
+                            updateFiles.id = "updateFiles";
+                            updateFiles.name = "updateFiles";
+                            updateFiles.style = `
+                            display: none`;
+                            updateFiles.onchange = (e) =>
                               (updateImage = e.target.files) &
                               (updateFilesValue.innerHTML =
-                                updateImage[0].name);
-                            updatePhoto.type = "file";
-                            updatePhoto.style = `
-                            width:75px;
-                            margin:10px;
-                            `;
+                                e.target.value.split("fakepath\\")[1]);
 
                             const updateFilesValue =
                               document.createElement("div");
                             updateFilesValue.style = `
-                              width:80%;
-                              overflow: hidden;
-                              white-space: nowrap;
-                              text-overflow: ellipsis;
-                              margin-bottom: 10px;
-                                `;
+                            display: flex;
+                            text-align: center;
+                            `;
 
                             const updateError = document.createElement("div");
                             updateError.id = "updateError";
+                            updateError.style = `
+                              display: flex;
+                              text-align: center;
+                              `;
+
                             const updateButton =
                               document.createElement("input");
                             updateButton.type = "submit";
 
+                            //insertion d'éléments dans le DOM
                             updateContent.appendChild(updateForm);
+                            updateForm.appendChild(updateLabel);
                             updateForm.appendChild(updateInput);
-                            updateForm.appendChild(updatePhoto);
+                            updateForm.appendChild(updateFilesLabel);
                             updateForm.appendChild(updateFilesValue);
-                            updateContent.appendChild(updateError);
+                            updateForm.appendChild(updateFiles);
+                            updateForm.appendChild(updateError);
                             updateForm.appendChild(updateButton);
                             postUpdateActiv = true;
                           } else {
@@ -491,14 +591,17 @@ function PostPage() {
                             postUpdateActiv = false;
                           }
 
+                          //envoi des modifications
                           const Update = (e) => {
                             e.preventDefault();
                             try {
                               const updateError =
                                 document.getElementById("updateError");
+
                               if (updateText == null && updateImage == null) {
                                 return (updateError.innerHTML = `<p style="color :${logColor.primary}">Veuillez modifié le texte ou l' image</p>`);
                               }
+
                               let bodyFormData = new FormData();
                               bodyFormData.append("posterId", PosterId);
 
@@ -536,9 +639,7 @@ function PostPage() {
                           };
                         };
 
-                        ////////////////////////////////////////////////////////
-
-                        ///////////////////////////////supprimer un post/////////
+                        /////////////////////////// Supprimer un post ///////////////////////////
                         const deletePost = () => {
                           try {
                             axios({
@@ -558,68 +659,79 @@ function PostPage() {
                             console.log(error);
                           }
                         };
-                        /////////////////////////////////////////////////////////////////
+                        ////////////////////////////////////////////////////////////////
 
-                        ////////////////////  Commentaires  //////////////////////////
+                        /////////////////////////// Commentaires ///////////////////////////
                         let commentActiv = false;
                         const HandleComments = () => {
                           if (commentActiv === false) {
-                            console.log(commentActiv);
                             commentActiv = true;
-                            console.log("PosterId : " + PosterId);
 
-                            const Error = document.createElement("div");
-                            Error.style = `
-                color: ${logColor.primary};
-                margin:10px
-                `;
+                            //création d'élément dans le DOM
+                            const errorComments = document.createElement("div");
+                            errorComments.style = `
+                              color: ${logColor.primary};
+                              margin:10px
+                              `;
 
-                            let form = document.createElement("form");
-                            form.style = `
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                margin: 20px;
-                `;
-                            form.onsubmit = (e) => {
+                            const formComment = document.createElement("form");
+                            formComment.style = `
+                              display: flex;
+                              flex-direction: column;
+                              align-items: center;
+                              margin: 20px;
+                              `;
+                            formComment.onsubmit = (e) => {
                               PostComment(e);
                             };
-                            let addComment = document.createElement("textarea");
+
+                            const commentLabel =
+                              document.createElement("label");
+                            commentLabel.htmlFor = "commentTextarea";
+                            commentLabel.innerHTML =
+                              "Modifiez votre commentaire";
+
+                            const addComment =
+                              document.createElement("textarea");
+                            addComment.id = "commentTextarea";
+                            addComment.name = "commentTextarea";
                             addComment.style = `
-                width:80%;
-                height: 80px;
-                `;
+                              width:80%;
+                              height: 80px;
+                              margin-top:10px;
+                              `;
                             addComment.placeholder =
-                              " Ajoutez un commentaire !!";
+                              "Ecrivez votre commentaire ici !";
                             addComment.onchange = (e) => {
                               comment = e.target.value;
                             };
 
-                            let buttonAddComment =
+                            const buttonAddComment =
                               document.createElement("input");
                             buttonAddComment.type = "submit";
                             buttonAddComment.value = " Commenter";
                             buttonAddComment.style = `
-                
-                margin-top:15px;
-                `;
-                            const ErrorComment = document.createElement("div");
+                            margin-top:15px;
+                            `;
 
-                            commentsContent.appendChild(Error);
+                            const errorComment = document.createElement("div");
 
-                            commentsContent.appendChild(form);
-                            form.appendChild(addComment);
-                            form.appendChild(buttonAddComment);
-                            form.appendChild(ErrorComment);
                             const divComments = document.createElement("div");
-                            divComments.style = `
-                                 
-                                    margin-bottom: 20px;
-                                    `;
+                            divComments.style = `   
+                              margin-bottom: 20px;
+                              `;
+
+                            //insertion d'éléments dans le DOM
+                            commentsContent.appendChild(errorComments);
+                            commentsContent.appendChild(formComment);
+                            formComment.appendChild(commentLabel);
+                            formComment.appendChild(addComment);
+                            formComment.appendChild(buttonAddComment);
+                            formComment.appendChild(errorComment);
                             commentsContent.appendChild(divComments);
 
                             //////////////// Affichage commentaires /////////////////
-                            //requête comment avec l'id du post
+                            //requête avec l'id du post
 
                             const GetComments = () => {
                               axios({
@@ -628,27 +740,31 @@ function PostPage() {
                                 withCredentials: true,
                               })
                                 .then((data) => {
+                                  //tri les commentaires du plus récent au plus ancien
                                   let commentSort = data.data.sort(sortComment);
                                   console.log(commentSort);
                                   commentSort.forEach((el) => {
-                                    //requête user avec l'id de l'utilisateur qui a poster le commentaire
+                                    //requête avec l'id de l'utilisateur qui a poster le commentaire
                                     axios({
                                       method: "get",
                                       url: `http://localhost:5000/api/user/${el.posterId}`,
                                       withCredentials: true,
                                     })
                                       .then((dataUser) => {
+                                        //création d'éléments dans le DOM
                                         const divComment =
                                           document.createElement("div");
                                         divComment.style = `
-                               
-                                    margin-bottom: 20px;
-                                    `;
+                                          margin-bottom: 20px;
+                                          `;
+
                                         const allComments =
                                           document.createElement("div");
+
                                         const divUpdate =
                                           document.createElement("div");
-                                        let buttonUpdateComment =
+
+                                        const buttonUpdateComment =
                                           document.createElement("input");
                                         buttonUpdateComment.type = "submit";
                                         buttonUpdateComment.value = "modifier";
@@ -656,12 +772,12 @@ function PostPage() {
                                           updateComment();
                                         };
                                         buttonUpdateComment.style = `
-                                      height: 100%;
-                                      margin-bottom:10px;
-                                      margin-right:10px;
-                                      `;
+                                        height: 100%;
+                                        margin-bottom:10px;
+                                        margin-right:10px;
+                                        `;
 
-                                        let buttonDeleteComment =
+                                        const buttonDeleteComment =
                                           document.createElement("input");
                                         buttonDeleteComment.type = "submit";
                                         buttonDeleteComment.value = "supprimer";
@@ -669,21 +785,23 @@ function PostPage() {
                                           deleteComment();
                                         };
                                         buttonDeleteComment.style = `
-                                      height: 100%;
-                                      margin-bottom:10px;
-                                      margin-left: 10px;
-                                      `;
+                                          height: 100%;
+                                          margin-bottom:10px;
+                                          margin-left: 10px;
+                                          `;
+
                                         allComments.style = `
-                                      border:1px solid black;
-                                      border-radius: 20px;
-                                      background-color: ${logColor.secondary};
-                                      margin: 10px;
-                                      
-                                      `;
-                                        commentsContent.appendChild(Error);
+                                        border:1px solid black;
+                                        border-radius: 20px;
+                                        background-color: ${logColor.secondary};
+                                        margin: 10px;
+                                        `;
 
+                                        //insertion d'éléments dans le DOM
+                                        commentsContent.appendChild(
+                                          errorComments
+                                        );
                                         divComments.appendChild(divComment);
-
                                         divComment.appendChild(allComments);
                                         divComment.appendChild(divUpdate);
                                         if (PosterId === el.posterId) {
@@ -694,58 +812,87 @@ function PostPage() {
                                             buttonDeleteComment
                                           );
                                         }
-                                        allComments.innerHTML = `
-                                    <p>Commentaire écrit par :   <span style="color: ${logColor.primary}">${dataUser.data.pseudo}</span></p>
-                                    <p>${el.text}</p>`;
 
-                                        const updateForm =
+                                        allComments.innerHTML = `
+                                        <p>Commentaire écrit par :   <span style="color: ${logColor.primary}">${dataUser.data.pseudo}</span></p>
+                                        <p>${el.text}</p>`;
+
+                                        const updateFormComment =
                                           document.createElement("form");
+
                                         const updateErrorComment =
                                           document.createElement("div");
-                                        ///////////////////////////////Modifier un commentaire//////////////////////////////////////////////////
+
+                                        ///////////////////////////////Modifier un commentaire///////////////////////////
 
                                         let commentUpdateActiv = false;
                                         const updateComment = () => {
                                           if (commentUpdateActiv === false) {
                                             commentUpdateActiv = true;
-                                            updateForm.onsubmit = (e) => {
+
+                                            //création d'éléments dans le DOM
+                                            updateFormComment.onsubmit = (
+                                              e
+                                            ) => {
                                               update(e);
                                             };
-                                            updateForm.style = `
+                                            updateFormComment.style = `
                                             display:flex;
                                             flex-direction: column;
                                             align-items:center;
                                             `;
 
-                                            const updateInput =
+                                            const updateCommentLabel =
+                                              document.createElement("label");
+                                            updateCommentLabel.htmlFor =
+                                              "updateInputComment";
+                                            updateCommentLabel.innerHTML =
+                                              "Modifiez votre commentaire";
+
+                                            const updateInputComment =
                                               document.createElement(
                                                 "textarea"
                                               );
-                                            updateInput.onchange = (e) => {
+                                            updateInputComment.id =
+                                              "updateInputComment";
+                                            updateInputComment.name =
+                                              "updateInputComment";
+                                            updateInputComment.onchange = (
+                                              e
+                                            ) => {
                                               updateTextComment =
                                                 e.target.value;
                                             };
-                                            updateInput.style = `
+                                            updateInputComment.style = `
                                             width:70%;
                                             height: 75px;
                                             margin-bottom: 15px;
                                             `;
-                                            updateInput.placeholder =
-                                              " Modifiez votre commentaire !";
+                                            updateInputComment.placeholder =
+                                              " Ecrivez votre commentaire ici !";
 
                                             const updateButton =
                                               document.createElement("input");
                                             updateButton.type = "submit";
-                                            divComment.appendChild(updateForm);
-                                            updateForm.appendChild(updateInput);
 
+                                            //insertion d'éléments dans le DOM
+                                            divComment.appendChild(
+                                              updateFormComment
+                                            );
                                             divComment.appendChild(
                                               updateErrorComment
                                             );
-                                            updateForm.appendChild(
-                                              updateButton
+                                            updateFormComment.appendChild(
+                                              updateCommentLabel
+                                            );
+                                            updateFormComment.appendChild(
+                                              updateInputComment
                                             );
 
+                                            updateFormComment.appendChild(
+                                              updateButton
+                                            );
+                                            //envoi des modifications du commentaire
                                             const update = (e) => {
                                               e.preventDefault();
                                               try {
@@ -768,7 +915,6 @@ function PostPage() {
                                                   .then((data) => {
                                                     divComments.innerHTML = "";
                                                     updateTextComment = null;
-
                                                     GetComments();
                                                   })
                                                   .catch((error) => {
@@ -780,12 +926,10 @@ function PostPage() {
                                             };
                                           } else {
                                             commentUpdateActiv = false;
-                                            updateForm.innerHTML = "";
+                                            updateFormComment.innerHTML = "";
                                             updateErrorComment.innerHTML = "";
                                           }
                                         };
-
-                                        ////////////////////////////////////////////////////////
 
                                         //////////////////////////////Supprimer un commentaire///////////
                                         const deleteComment = () => {
@@ -819,23 +963,20 @@ function PostPage() {
                                 })
 
                                 .catch((error) => {
-                                  Error.innerHTML =
+                                  errorComments.innerHTML =
                                     "Aucun commentaire sur ce post";
                                   console.log(error);
                                 });
                             };
                             GetComments();
+
                             ////////////////////  Poster un commentaire /////////////////////
 
                             const PostComment = (e) => {
                               e.preventDefault();
 
-                              console.log(PosterId);
-                              console.log("début postcomment");
-                              console.log(element.postId);
-                              console.log(comment);
                               if (comment === null) {
-                                return (ErrorComment.innerHTML = `<p style="color :${logColor.primary}">Veuillez écrire un commentaire</p>`);
+                                return (errorComment.innerHTML = `<p style="color :${logColor.primary}">Veuillez écrire un commentaire</p>`);
                               }
                               try {
                                 axios({
@@ -849,15 +990,14 @@ function PostPage() {
                                   },
                                 })
                                   .then((data) => {
-                                    if (Error) {
-                                      Error.innerHTML = null;
+                                    if (errorComments) {
+                                      errorComments.innerHTML = null;
                                     }
-                                    if (ErrorComment) {
-                                      ErrorComment.innerHTML = null;
+                                    if (errorComment) {
+                                      errorComment.innerHTML = null;
                                     }
                                     addComment.value = "";
                                     divComments.innerHTML = "";
-                                    console.log(addComment.value);
                                     comment = null;
                                     GetComments();
                                   })
@@ -867,10 +1007,7 @@ function PostPage() {
                               } catch (error) {
                                 console.log(error);
                               }
-                              console.log("fin de postcomment");
                             };
-
-                            /////////////////////////////////////////////////////////////////
                           } else {
                             commentsContent.innerHTML = "";
                             commentActiv = false;
@@ -884,7 +1021,13 @@ function PostPage() {
                       });
                   })
                   .catch((error) => {
-                    return console.log(error);
+                    if (
+                      error.response.data.message === "Utilisateur introuvable"
+                    ) {
+                      console.log("Utilisateur supprimé");
+                    } else {
+                      console.log(error);
+                    }
                   });
               })
               .catch((error) => {
@@ -903,7 +1046,6 @@ function PostPage() {
   return (
     <PageContent id="pageContent">
       <DivPost id="divPost"></DivPost>
-
       <PostsContent id="postsContent"></PostsContent>
     </PageContent>
   );

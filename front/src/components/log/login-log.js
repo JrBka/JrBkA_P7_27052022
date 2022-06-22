@@ -3,6 +3,8 @@ import Axios from "axios";
 import styled from "styled-components";
 import color from "../../style/color-style";
 
+// composant stylisé
+
 const Modal = styled.div`
   display: flex;
   flex-direction: column;
@@ -28,6 +30,8 @@ const ErrorColor = styled.p`
   text-align: center;
   color: ${color.primary};
 `;
+
+// connexion à l'application
 
 function Login({ email, setEmail, password, setPassword }) {
   const handleLogin = (e) => {
@@ -56,29 +60,30 @@ function Login({ email, setEmail, password, setPassword }) {
     <Modal>
       <h1>Connexion</h1>
       <br />
-      <label htmlFor="email">Email</label>
-      <br />
-      <input
-        type="text"
-        name="email"
-        id="email"
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ margin: "0 0 20px 0" }}
-      />
-      <br />
-      <br />
-      <label htmlFor="password">Mot de passe</label>
-      <br />
-      <input
-        type="password"
-        name="password"
-        id="password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <br />
-      <ErrorColor id="error"></ErrorColor>
-      <br />
-      <form id="login-form" action="" onSubmit={handleLogin}>
+      <form id="login-form" onSubmit={handleLogin}>
+        <label htmlFor="email">Email</label>
+        <br />
+        <input
+          type="text"
+          name="email"
+          id="email"
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ margin: "0 0 20px 0" }}
+        />
+        <br />
+        <br />
+        <label htmlFor="password">Mot de passe</label>
+        <br />
+        <input
+          type="password"
+          name="password"
+          id="password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <br />
+        <ErrorColor id="error"></ErrorColor>
+        <br />
+
         <Button type="submit" value="Se connecter" />
       </form>
     </Modal>

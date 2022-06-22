@@ -2,13 +2,15 @@ import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import logo from "../../logo/icon-modif-petite.png";
-import logoFooter from "../../logo/icon-left-font-monochrome-black.png";
+import logoFooter from "../../logo/logo-monochrome-modif.png";
 import { idContext } from "../appContext";
 import PostPage from "./postPage-home";
 import UpdateProfil from "./updateProfil-home";
 import UsersPage from "./usersPage-home";
 import Logout from "./logout-home";
 import logColor from "../../style/color-style";
+
+// composant stylisé
 
 const Header = styled.header`
   display: flex;
@@ -116,9 +118,10 @@ const Footer = styled.footer`
   background-color: ${logColor.secondary};
 `;
 const LogoFooter = styled.img`
-  margin-left: 20px;
   width: 50%;
 `;
+
+// Gestion navBar
 
 function Headers() {
   const id = useContext(idContext);
