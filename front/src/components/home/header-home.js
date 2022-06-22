@@ -36,6 +36,7 @@ const NavContent = styled.div`
 
 const ImgLogo = styled.img`
   height: 100%;
+  width:100%
   max-width: 400px;
   min-width: 250px;
   min-height: 50px;
@@ -119,6 +120,7 @@ const Footer = styled.footer`
 `;
 const LogoFooter = styled.img`
   width: 50%;
+  height: "";
 `;
 
 // Gestion navBar
@@ -171,7 +173,7 @@ function Headers() {
   return (
     <div>
       <Header>
-        <ImgLogo src={logo} />
+        <ImgLogo src={logo} alt="Logo" />
         <NavContent>
           <div>
             <Ul>
@@ -202,7 +204,7 @@ function Headers() {
             </Ul>
           </div>
           <LinkContent>
-            <ImgProfil src={img} />
+            <ImgProfil src={img} alt="Photo de profil" />
             <P id="updateProfil" onClick={handlePage}>
               Profil
             </P>
@@ -214,7 +216,7 @@ function Headers() {
       {usersPage && <UsersPage />}
       {logout && <Logout />}
       <Footer>
-        <LogoFooter src={logoFooter} />
+        <LogoFooter src={logoFooter} alt="Logo noir" />
       </Footer>
     </div>
   );

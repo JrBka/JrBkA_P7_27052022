@@ -136,7 +136,5 @@ module.exports.login = (req, res, next) => {
 
 module.exports.logout = (req, res) => {
   res.cookie("token", "", { maxAge: -1 });
-
-  //res.redirect("");
   res.status(200).json({ message: "Vous êtes déconnecté" });
 };

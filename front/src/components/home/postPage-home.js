@@ -209,6 +209,7 @@ function PostPage() {
             }
             if (postPhoto != null) {
               postPhoto = null;
+              postFilesValue.innerHTML = null;
             }
             postsContent.innerHTML = "";
 
@@ -300,6 +301,7 @@ function PostPage() {
                         likesContent.style = `
                         display: flex;
                         align-items: center;
+                        margin-right: 10px;
                         `;
 
                         const like = document.createElement("div");
@@ -372,6 +374,8 @@ function PostPage() {
 
                         const postPhoto = document.createElement("img");
                         postPhoto.style = `
+                          width:100%;
+                          height:100%;
                          max-height:100%;
                          max-width:100%;
                           `;
@@ -390,7 +394,7 @@ function PostPage() {
                         //insertion d'éléments dans le DOM
                         postsContent.appendChild(postContent);
                         postContent.appendChild(posterContent);
-                        if (PosterId === element.posterId) {
+                        if (PosterId === element.posterId || PosterId === 95) {
                           postContent.appendChild(divPostUpdate);
                           divPostUpdate.appendChild(buttonUpdate);
                           divPostUpdate.appendChild(buttonDelete);
@@ -421,6 +425,7 @@ function PostPage() {
 
                         if (element.photo) {
                           postPhoto.src = element.photo;
+                          postPhoto.alt = "Photo du post";
                         }
                         if (element.texte) {
                           postTexte.innerHTML = ` ${element.texte} `;
@@ -804,7 +809,10 @@ function PostPage() {
                                         divComments.appendChild(divComment);
                                         divComment.appendChild(allComments);
                                         divComment.appendChild(divUpdate);
-                                        if (PosterId === el.posterId) {
+                                        if (
+                                          PosterId === el.posterId ||
+                                          PosterId === 95
+                                        ) {
                                           divUpdate.appendChild(
                                             buttonUpdateComment
                                           );
@@ -990,6 +998,7 @@ function PostPage() {
                                   },
                                 })
                                   .then((data) => {
+                                    console.log(data);
                                     if (errorComments) {
                                       errorComments.innerHTML = null;
                                     }
@@ -1040,7 +1049,6 @@ function PostPage() {
         });
     };
     GetPost();
-    console.log("fin");
   }, []);
 
   return (

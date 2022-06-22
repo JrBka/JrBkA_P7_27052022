@@ -54,46 +54,50 @@ module.exports.modifyPost = (req, res) => {
           return res.status(400).json({ message: err });
         }
         if (
-          resultat[0].postId != req.params.id ||
-          resultat[0].posterId != req.body.posterId
+          (resultat[0].postId == req.params.id &&
+            resultat[0].posterId == req.body.posterId) ||
+          (resultat[0].postId == req.params.id && req.body.posterId == 95)
         ) {
+          if (req.file && resultat[0].photo != null) {
+            var newPost = {
+              ...req.body,
+              photo: `${req.protocol}://${req.get("host")}/images/posts/${
+                req.file.filename
+              }`,
+            };
+            const filename = resultat[0].photo.split("/posts/")[1];
+
+            fs.unlink(`images/posts/${filename}`, () => {});
+          }
+          if (req.file && resultat[0].photo == null) {
+            var newPost = {
+              ...req.body,
+              photo: `${req.protocol}://${req.get("host")}/images/posts/${
+                req.file.filename
+              }`,
+            };
+          }
+          if (!req.file) {
+            var newPost = { ...req.body };
+          }
+          db.query(
+            `UPDATE posts SET ? WHERE postId = ?`,
+            [newPost, req.params.id],
+            (err, result) => {
+              if (err) {
+                return res
+                  .status(400)
+                  .json({ message: "Problème post  " + err });
+              } else {
+                return res
+                  .status(200)
+                  .json({ message: "Post modifié, pas de modification image" });
+              }
+            }
+          );
+        } else {
           return res.status(400).json({ message: "Requête non authorisé !" });
         }
-        if (req.file && resultat[0].photo != null) {
-          var newPost = {
-            ...req.body,
-            photo: `${req.protocol}://${req.get("host")}/images/posts/${
-              req.file.filename
-            }`,
-          };
-          const filename = resultat[0].photo.split("/posts/")[1];
-
-          fs.unlink(`images/posts/${filename}`, () => {});
-        }
-        if (req.file && resultat[0].photo == null) {
-          var newPost = {
-            ...req.body,
-            photo: `${req.protocol}://${req.get("host")}/images/posts/${
-              req.file.filename
-            }`,
-          };
-        }
-        if (!req.file) {
-          var newPost = { ...req.body };
-        }
-        db.query(
-          `UPDATE posts SET ? WHERE postId = ?`,
-          [newPost, req.params.id],
-          (err, result) => {
-            if (err) {
-              return res.status(400).json({ message: "Problème post  " + err });
-            } else {
-              return res
-                .status(200)
-                .json({ message: "Post modifié, pas de modification image" });
-            }
-          }
-        );
       }
     );
   } catch (error) {
@@ -109,41 +113,47 @@ module.exports.deletePost = (req, res) => {
       if (!resultat[0]) {
         return res.status(400).json({ message: "Post introuvable  " });
       }
-      if (resultat[0].posterId != req.cookies.token.id) {
+      if (
+        resultat[0].posterId == req.cookies.token.id ||
+        req.cookies.token.id == 95
+      ) {
+        if (resultat[0].photo) {
+          const filename = resultat[0].photo.split("/posts/")[1];
+
+          fs.unlink(`images/posts/${filename}`, () => {
+            console.log(filename, ": supprimé");
+          });
+        }
+        db.query(
+          `DELETE FROM posts WHERE postId = ?`,
+          req.params.id,
+          (err, result) => {
+            if (err) {
+              return res
+                .status(400)
+                .json({ message: "Suppression du post échoué  " + err });
+            }
+          }
+        );
+        db.query(
+          `DELETE FROM comments WHERE postId = ?`,
+          req.params.id,
+          (err, result) => {
+            if (err) {
+              return res.status(400).json({
+                message:
+                  "Suppression des commentaires liés au post échoué  " + err,
+              });
+            } else {
+              res
+                .status(200)
+                .json({ message: "Post et commentaires supprimé" });
+            }
+          }
+        );
+      } else {
         return res.status(400).json({ message: "Requete non autorisé" });
       }
-      if (resultat[0].photo) {
-        const filename = resultat[0].photo.split("/posts/")[1];
-
-        fs.unlink(`images/posts/${filename}`, () => {
-          console.log(filename, ": supprimé");
-        });
-      }
-      db.query(
-        `DELETE FROM posts WHERE postId = ?`,
-        req.params.id,
-        (err, result) => {
-          if (err) {
-            return res
-              .status(400)
-              .json({ message: "Suppression du post échoué  " + err });
-          }
-        }
-      );
-      db.query(
-        `DELETE FROM comments WHERE postId = ?`,
-        req.params.id,
-        (err, result) => {
-          if (err) {
-            return res.status(400).json({
-              message:
-                "Suppression des commentaires liés au post échoué  " + err,
-            });
-          } else {
-            res.status(200).json({ message: "Post et commentaires supprimé" });
-          }
-        }
-      );
     }
   );
 };

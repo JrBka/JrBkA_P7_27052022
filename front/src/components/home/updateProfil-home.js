@@ -39,7 +39,7 @@ const Span = styled.span`
 `;
 
 const P = styled.p`
-  width: 100%;
+  width: 80%;
   word-break: break-word;
 `;
 
@@ -52,6 +52,7 @@ const Form = styled.form`
   flex-direction: column;
   border: 2px solid ${logColor.tertiary};
   margin-top: 30px;
+  max-width: 350px;
 `;
 
 const Label = styled.label`

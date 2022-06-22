@@ -221,27 +221,106 @@ module.exports.deleteUser = (req, res) => {
     const user = "SELECT * FROM users WHERE id = ?";
     db.query(user, req.params.id, (error, data) => {
       if (!data[0]) {
-        res.status(400).json({ message: "utilisateur introuvable" });
+        return res.status(400).json({ message: "utilisateur introuvable" });
       }
       if (data[0].id != req.cookies.token.id) {
         return res.status(400).json({ message: "Requete non autorisé" });
       }
-      const photoProfil = "http://localhost:5000/images/profil/profil.jpg";
-      if (data[0].photo != photoProfil) {
-        const filename = data[0].photo.split("/profil/")[1];
-        fs.unlink(`images/profil/${filename}`, () => {});
+      if (error) {
+        return res.status(400).json({ error });
       }
-      db.query(
-        `DELETE FROM users WHERE id = ?`,
-        req.params.id,
-        (err, result) => {
-          res.cookie("token", "", { maxAge: -1 });
 
-          res.status(200).json({ message: "Utilisateur supprimé" });
+      try {
+        db.query(
+          `SELECT * FROM comments WHERE PosterId = ?`,
+          req.params.id,
+          (err, result) => {
+            if (result) {
+              console.log(result);
+              db.query(
+                `DELETE FROM comments WHERE posterId = ?`,
+                req.params.id,
+                (err, result) => {
+                  if (err) {
+                    return console.log(err);
+                  }
+                }
+              );
+            }
+          }
+        );
+
+        db.query(
+          `SELECT * FROM likes WHERE likerId = ?`,
+          req.params.id,
+          (err, result) => {
+            if (result) {
+              console.log(result);
+              db.query(
+                `DELETE FROM likes WHERE likerId = ?`,
+                req.params.id,
+                (err, result) => {
+                  if (err) {
+                    return console.log(err);
+                  }
+                }
+              );
+            }
+          }
+        );
+
+        db.query(
+          `SELECT * FROM posts WHERE PosterId = ?`,
+          req.params.id,
+          (err, result) => {
+            console.log(result);
+            if (result) {
+              const deletePhoto = result.map((e) => e.photo);
+              if (deletePhoto) {
+                console.log(deletePhoto);
+                deletePhoto.forEach((element) => {
+                  console.log(element);
+                  const filename = element.split("/posts/")[1];
+                  fs.unlink(`images/posts/${filename}`, () => {});
+                });
+              }
+              db.query(
+                `DELETE FROM posts WHERE posterId = ?`,
+                req.params.id,
+                (err, result) => {
+                  if (err) {
+                    return console.log(err);
+                  }
+                }
+              );
+            }
+          }
+        );
+
+        const photoProfil = "http://localhost:5000/images/profil/profil.jpg";
+        if (data[0].photo != photoProfil) {
+          console.log(data[0].photo);
+          const filename = data[0].photo.split("/profil/")[1];
+          fs.unlink(`images/profil/${filename}`, () => {});
         }
-      );
+
+        db.query(
+          `DELETE FROM users WHERE id = ?`,
+          req.params.id,
+          (err, result) => {
+            if (err) {
+              return console.log(err);
+            }
+            res.status(200).json({ message: "Utilisateur supprimé" });
+          }
+        );
+
+        res.cookie("token", "", { maxAge: -1 });
+      } catch (error) {
+        return res.status(400).json(error);
+      }
     });
   } catch (error) {
-    res.status(400).json(error);
+    return res.status(400).json(error);
   }
 };

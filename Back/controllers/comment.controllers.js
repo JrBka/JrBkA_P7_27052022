@@ -8,19 +8,8 @@ module.exports.createComment = (req, res) => {
     db.query(`INSERT INTO comments SET ?`, newComment, (err, result) => {
       if (err) {
         res.status(400).json({ message: "Post invalide  " + err });
-      } else {
-        db.query(
-          `SELECT * FROM comments WHERE text LIKE = ? AND postId = ? AND posterId = ? `[
-            (req.body.text, req.body.postId, req.body.posterId)
-          ],
-          (err, resultat) => {
-            res.status(201).json({
-              message: "Commentaire créé  ",
-              id_commentaire: result.insertId,
-            });
-          }
-        );
       }
+      res.status(201).json({ message: "Commentaire créé" });
     });
   } catch (error) {
     return res.status(400).json({ message: error });
@@ -63,12 +52,12 @@ module.exports.modifyComment = (req, res) => {
   try {
     console.log(req.body);
     console.log(req.cookies.token.id);
-    if (req.body.posterId != req.cookies.token.id) {
+    if (req.body.posterId != req.cookies.token.id || req.body.posterId != 95) {
       return res.status(400).json({ message: "reqête non autorisé" });
     }
     db.query(
-      `UPDATE comments SET text = ? WHERE id = ? AND posterId = ? AND postId = ? `,
-      [req.body.text, req.params.id, req.body.posterId, req.body.postId],
+      `UPDATE comments SET text = ? WHERE id = ?  AND postId = ? `,
+      [req.body.text, req.params.id, req.body.postId],
       (err, result) => {
         if (err) {
           return res.status(400).json({ message: err });
@@ -94,7 +83,10 @@ module.exports.deleteComment = (req, res) => {
         if (!resultat[0]) {
           return res.status(400).json({ message: "Commentaire introuvable  " });
         }
-        if (resultat[0].posterId == req.cookies.token.id) {
+        if (
+          resultat[0].posterId == req.cookies.token.id ||
+          req.cookies.token.id === 95
+        ) {
           db.query(
             `DELETE FROM comments WHERE id = ?`,
             req.params.id,
