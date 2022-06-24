@@ -24,11 +24,12 @@ renommez le en .env
 
 
 ouvrez le fichier .env vous y trouverez 3 paramètres:
+
 USER=
 
 PASSWORD=
 
-SECRET_KEy=
+SECRET_KEY=
 
 remplissez le USER avec le user de votre base de donnée
 
