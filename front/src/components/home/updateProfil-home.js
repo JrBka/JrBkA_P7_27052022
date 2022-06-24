@@ -187,7 +187,7 @@ function UpdateProfil() {
           photoError.innerHTML = null;
         }
         GetProfil();
-        alert("Modification réussi");
+        alert("Profil modifié");
       })
       .catch((error) => {
         //insertion d'élément dans le DOM
