@@ -124,19 +124,19 @@ function UpdateProfil() {
 
     const bodyFormData = new FormData();
     bodyFormData.append("id", id[0]);
-    if (newPseudo != null && newPseudo != "") {
+    if (newPseudo !== null && newPseudo !== "") {
       bodyFormData.append("pseudo", newPseudo);
     }
-    if (newPassword != null && newPassword != "") {
+    if (newPassword !== null && newPassword !== "") {
       bodyFormData.append("password", newPassword);
     }
-    if (newEmail != null && newEmail != "") {
+    if (newEmail !== null && newEmail !== "") {
       bodyFormData.append("email", newEmail);
     }
-    if (newBio != null && newBio != "") {
+    if (newBio !== null && newBio !== "") {
       bodyFormData.append("bio", newBio);
     }
-    if (newPhoto != null && newPhoto != "") {
+    if (newPhoto !== null && newPhoto !== "") {
       bodyFormData.append("image", newPhoto[0]);
     }
 

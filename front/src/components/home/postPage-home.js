@@ -222,9 +222,7 @@ function PostPage() {
       })
         .then((data) => {
           //tri des posts
-          if (data.data[0] == null || data.data[0] == "") {
-            console.log("probleme");
-          }
+
           data.data.forEach((element) => {
             axios({
               method: "get",
