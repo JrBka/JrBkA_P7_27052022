@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { idContext } from "../appContext";
 import logColor from "../../style/color-style";
@@ -68,24 +68,22 @@ let newPassword = null;
 
 function UpdateProfil() {
   const id = useContext(idContext);
-  const [pseudo, setPseudo] = useState("");
-  const [email, setEmail] = useState("");
-  const [bio, setBio] = useState("");
-  const [photo, setPhoto] = useState("");
+  const [pseudo, setPseudo] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [bio, setBio] = useState(null);
+  const [photo, setPhoto] = useState(null);
 
   //Profil utilisateur
   const GetProfil = () => {
-    useEffect(() => {
-      axios({
-        method: "get",
-        url: `http://localhost:5000/api/user/${id}`,
-        withCredentials: true,
-      }).then((data) => {
-        setPseudo(data.data.pseudo);
-        setEmail(data.data.email);
-        setBio(data.data.bio);
-        setPhoto(data.data.photo);
-      });
+    axios({
+      method: "get",
+      url: `http://localhost:5000/api/user/${id}`,
+      withCredentials: true,
+    }).then((data) => {
+      setPseudo(data.data.pseudo);
+      setEmail(data.data.email);
+      setBio(data.data.bio);
+      setPhoto(data.data.photo);
     });
   };
   GetProfil();
@@ -125,26 +123,26 @@ function UpdateProfil() {
     }
 
     const bodyFormData = new FormData();
-    bodyFormData.append("id", id);
-    if (newPseudo != null) {
+    bodyFormData.append("id", id[0]);
+    if (newPseudo != null && newPseudo != "") {
       bodyFormData.append("pseudo", newPseudo);
     }
-    if (newPassword != null) {
+    if (newPassword != null && newPassword != "") {
       bodyFormData.append("password", newPassword);
     }
-    if (newEmail != null) {
+    if (newEmail != null && newEmail != "") {
       bodyFormData.append("email", newEmail);
     }
-    if (newBio != null) {
+    if (newBio != null && newBio != "") {
       bodyFormData.append("bio", newBio);
     }
-    if (newPhoto != null) {
+    if (newPhoto != null && newPhoto != "") {
       bodyFormData.append("image", newPhoto[0]);
     }
-
+    console.log(bodyFormData.id);
     axios({
       method: "put",
-      url: `http://localhost:5000/api/user/${id}`,
+      url: `http://localhost:5000/api/user/${id[0]}`,
       withCredentials: true,
       data: bodyFormData,
       headers: {
@@ -193,6 +191,7 @@ function UpdateProfil() {
       })
       .catch((error) => {
         //insertion d'élément dans le DOM
+        console.log(error);
         if (error.response.data.message === "Pseudo invalide") {
           pseudoError.innerHTML = "<p>Pseudo invalide</p>";
         }
@@ -213,10 +212,10 @@ function UpdateProfil() {
   };
 
   // supprime le compte de l'utilisateur
-  const deleteUser = () => {
+  const DeleteUser = () => {
     axios({
       method: "delete",
-      url: `http://localhost:5000/api/user/${id}`,
+      url: `http://localhost:5000/api/user/${id[0]}`,
       withCredentials: true,
     })
       .then((data) => {
@@ -261,8 +260,8 @@ function UpdateProfil() {
             name="email"
             type="email"
             placeholder="Nouvel email"
-            onChange={(e) => (newEmail = e.target.value)}
             style={{ width: "80%" }}
+            onChange={(e) => (newEmail = e.target.value)}
           />
           <div id="emailError" style={{ color: `${logColor.primary}` }}></div>
         </DivInput>
@@ -277,8 +276,8 @@ function UpdateProfil() {
             name="password"
             type="password"
             placeholder="Nouveau mot de passe"
-            onChange={(e) => (newPassword = e.target.value)}
             style={{ width: "80%" }}
+            onChange={(e) => (newPassword = e.target.value)}
           />
           <div
             id="passwordError"
@@ -325,7 +324,7 @@ function UpdateProfil() {
       <br />
       <br />
       <div>
-        <Input type="submit" value="Supprimer ce compte" onClick={deleteUser} />
+        <Input type="submit" value="Supprimer ce compte" onClick={DeleteUser} />
       </div>
     </Div>
   );

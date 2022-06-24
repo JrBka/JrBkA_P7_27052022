@@ -4,12 +4,16 @@ const fs = require("fs");
 
 module.exports.getPosts = (req, res) => {
   try {
-    db.query(`SELECT * FROM posts`, (err, result) => {
-      if (!result) {
-        res.status(400).json({ message: "post introuvable" });
+    db.query(
+      `SELECT postId, posts.posterId, posts.texte, posts.photo, id, pseudo FROM posts  LEFT JOIN reseau.users ON posts.posterId = reseau.users.id ORDER BY posts.postId DESC;`,
+      (err, result) => {
+        if (!result) {
+          res.status(400).json({ message: "post introuvable" });
+        }
+        res.status(200).json(result);
+        console.log(result);
       }
-      res.status(200).json(result);
-    });
+    );
   } catch (error) {
     return res.status(400).json({ message: error });
   }
@@ -56,29 +60,49 @@ module.exports.modifyPost = (req, res) => {
         if (
           (resultat[0].postId == req.params.id &&
             resultat[0].posterId == req.body.posterId) ||
-          (resultat[0].postId == req.params.id && req.body.posterId == 95)
+          (resultat[0].postId == req.params.id &&
+            res.locals.user[0].privilege == "admin")
         ) {
           if (req.file && resultat[0].photo != null) {
-            var newPost = {
-              ...req.body,
-              photo: `${req.protocol}://${req.get("host")}/images/posts/${
-                req.file.filename
-              }`,
-            };
-            const filename = resultat[0].photo.split("/posts/")[1];
+            if (req.body.texte) {
+              var newPost = {
+                texte: req.body.texte,
+                photo: `${req.protocol}://${req.get("host")}/images/posts/${
+                  req.file.filename
+                }`,
+              };
+              const filename = resultat[0].photo.split("/posts/")[1];
 
-            fs.unlink(`images/posts/${filename}`, () => {});
+              fs.unlink(`images/posts/${filename}`, () => {});
+            } else {
+              var newPost = {
+                photo: `${req.protocol}://${req.get("host")}/images/posts/${
+                  req.file.filename
+                }`,
+              };
+              const filename = resultat[0].photo.split("/posts/")[1];
+
+              fs.unlink(`images/posts/${filename}`, () => {});
+            }
           }
           if (req.file && resultat[0].photo == null) {
-            var newPost = {
-              ...req.body,
-              photo: `${req.protocol}://${req.get("host")}/images/posts/${
-                req.file.filename
-              }`,
-            };
+            if (req.body.texte) {
+              var newPost = {
+                texte: req.body.texte,
+                photo: `${req.protocol}://${req.get("host")}/images/posts/${
+                  req.file.filename
+                }`,
+              };
+            } else {
+              var newPost = {
+                photo: `${req.protocol}://${req.get("host")}/images/posts/${
+                  req.file.filename
+                }`,
+              };
+            }
           }
           if (!req.file) {
-            var newPost = { ...req.body };
+            var newPost = { texte: req.body.texte };
           }
           db.query(
             `UPDATE posts SET ? WHERE postId = ?`,
@@ -89,9 +113,7 @@ module.exports.modifyPost = (req, res) => {
                   .status(400)
                   .json({ message: "Problème post  " + err });
               } else {
-                return res
-                  .status(200)
-                  .json({ message: "Post modifié, pas de modification image" });
+                return res.status(200).json({ message: "Post modifié" });
               }
             }
           );
@@ -115,7 +137,7 @@ module.exports.deletePost = (req, res) => {
       }
       if (
         resultat[0].posterId == req.cookies.token.id ||
-        req.cookies.token.id == 95
+        res.locals.user[0].privilege == "admin"
       ) {
         if (resultat[0].photo) {
           const filename = resultat[0].photo.split("/posts/")[1];

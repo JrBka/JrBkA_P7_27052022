@@ -17,7 +17,7 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background-color: ${logColor.secondary};
+  background-color: ${logColor.primary};
   @media screen and (max-width: 768px) {
     flex-direction: column;
   }
@@ -62,6 +62,7 @@ const LinkContent = styled.div`
   padding: 12px;
   border: 3px solid ${logColor.tertiary};
   border-radius: 25px;
+  background-color: ${logColor.secondary};
 `;
 
 const ImgProfil = styled.img`
@@ -98,8 +99,8 @@ const Li = styled.li`
 
 const NavBar = styled.input`
   font-weight: bold;
-  color: white;
-  background-color: ${logColor.tertiary};
+  color: ${logColor.tertiary};
+  background-color: ${logColor.secondary};
   border-radius: 30px;
   border: hidden;
   margin: 0;
@@ -107,7 +108,7 @@ const NavBar = styled.input`
   cursor: pointer;
   &:hover {
     transform: scale(1.1);
-    box-shadow: 2px 2px 2px white;
+    box-shadow: 2px 2px 2px ${logColor.tertiary};
   }
 `;
 const Footer = styled.footer`
@@ -116,7 +117,7 @@ const Footer = styled.footer`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: ${logColor.secondary};
+  background-color: ${logColor.primary};
 `;
 const LogoFooter = styled.img`
   width: 50%;

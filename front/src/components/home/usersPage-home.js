@@ -24,7 +24,7 @@ function UsersPage() {
         //creation d'éléments dans le DOM
         const userContent = document.createElement("div");
         userContent.style = `
-          border: 2px solid ${logColor.tertiary};
+          border: 2px solid ${logColor.secondary};
           font-weight:bold; 
           display:flex; 
           flex-direction: column;
@@ -62,7 +62,7 @@ function UsersPage() {
         //évenement "quand la souris quitte la cible"
         userContent.onmouseleave = () => {
           userContent.style = `
-          border: 2px solid ${logColor.tertiary}; 
+          border: 2px solid ${logColor.secondary}; 
           font-weight:bold; 
           display:flex; 
           flex-direction: column;
@@ -105,8 +105,8 @@ function UsersPage() {
         const divUser = document.createElement("div");
 
         //insertion d'éléments dans le DOM
-        usersContent.appendChild(divUser);
         usersContent.appendChild(userContent);
+        usersContent.appendChild(divUser);
         userContent.appendChild(userPhoto);
         userContent.appendChild(userPseudo);
 
@@ -117,7 +117,6 @@ function UsersPage() {
         const GetUser = () => {
           if (divActiv === false) {
             divActiv = true;
-            console.log(divActiv);
             divUser.style = `
             border: 3px solid black;
             border-radius: 20px;

@@ -36,16 +36,6 @@ let updateTextComment = null;
 let PosterId = "";
 
 //fonction de tri par ordre décroissant
-const sortPost = (a, b) => {
-  if (a.postId < b.postId) {
-    return +1;
-  }
-  if (a.postId > b.postId) {
-    return -1;
-  } else {
-    return 0;
-  }
-};
 const sortComment = (a, b) => {
   if (a.id < b.id) {
     return +1;
@@ -79,7 +69,7 @@ function PostPage() {
       display: flex;
       flex-direction: column;
       align-items: center;
-      border: 1px solid ${logColor.primary};
+      border: 2px solid ${logColor.secondary};
       border-radius: 20px;
     `;
     postForm.onsubmit = (e) => {
@@ -182,7 +172,7 @@ function PostPage() {
           return (postError.innerHTML = `<p style="color :${logColor.primary}">Veuillez ajouter du texte ou une image</p>`);
         }
         let bodyFormData = new FormData();
-        bodyFormData.append("posterId", PosterId);
+        bodyFormData.append("posterId", PosterId[0]);
         if (postText == null) {
           console.log("ok");
         }
@@ -232,89 +222,75 @@ function PostPage() {
       })
         .then((data) => {
           //tri des posts
-          let dataSort = data.data.sort(sortPost);
-          dataSort.forEach((element) => {
+
+          data.data.forEach((element) => {
             axios({
               method: "get",
               url: `http://localhost:5000/api/post/like/${element.postId}`,
               withCredentials: true,
             })
-              .then((dataLike) => {
-                //requête pour obtenir le pseudo de l'utilisateur qui à fait le post
-                axios({
-                  method: "get",
-                  url: `http://localhost:5000/api/user/${element.posterId}`,
-                  withCredentials: true,
-                })
-                  .then((dataUser) => {
-                    axios({
-                      method: "get",
-                      url: `http://localhost:5000/api/post/likers/${element.postId}`,
-                      withCredentials: true,
-                    })
-                      .then((dataLikers) => {
-                        // création d'élément dans le DOM
-                        const postContent = document.createElement("div");
-                        postContent.style =
-                          `border: 1px solid ${logColor.primary};` +
-                          "border-radius: 20px;" +
-                          "font-weight:bold;" +
-                          "display:flex;" +
-                          "flex-direction: column;" +
-                          "align-items:center;" +
-                          "text-align: center;" +
-                          "min-height:100px;" +
-                          "width: 70%;" +
-                          "margin-top: 20px;";
+              .then((dataLikes) => {
+                // création d'élément dans le DOM
+                const postContent = document.createElement("div");
+                postContent.style =
+                  `border: 2px solid ${logColor.secondary};` +
+                  "border-radius: 20px;" +
+                  "font-weight:bold;" +
+                  "display:flex;" +
+                  "flex-direction: column;" +
+                  "align-items:center;" +
+                  "text-align: center;" +
+                  "min-height:100px;" +
+                  "width: 70%;" +
+                  "margin-top: 20px;";
 
-                        const posterContent = document.createElement("div");
-                        posterContent.style = `
+                const posterContent = document.createElement("div");
+                posterContent.style = `
                           width:100%;
                           display: flex;
                           justify-content: space-around;
                           border-bottom: 1px solid ${logColor.secondary};
                           align-items: center;`;
 
-                        const divPostUpdate = document.createElement("div");
+                const divPostUpdate = document.createElement("div");
 
-                        const buttonUpdate = document.createElement("input");
-                        buttonUpdate.type = "submit";
-                        buttonUpdate.value = "modifier";
-                        buttonUpdate.onclick = () => {
-                          UpdatePost();
-                        };
-                        buttonUpdate.style = `
+                const buttonUpdate = document.createElement("input");
+                buttonUpdate.type = "submit";
+                buttonUpdate.value = "modifier";
+                buttonUpdate.onclick = () => {
+                  UpdatePost();
+                };
+                buttonUpdate.style = `
                         margin:10px
                         `;
 
-                        const buttonDelete = document.createElement("input");
-                        buttonDelete.type = "submit";
-                        buttonDelete.value = "supprimer";
-                        buttonDelete.onclick = () => {
-                          deletePost();
-                        };
-                        buttonDelete.style = `
+                const buttonDelete = document.createElement("input");
+                buttonDelete.type = "submit";
+                buttonDelete.value = "supprimer";
+                buttonDelete.onclick = () => {
+                  deletePost();
+                };
+                buttonDelete.style = `
                         margin:10px;
                         `;
 
-                        const likesContent = document.createElement("div");
-                        likesContent.style = `
+                const likesContent = document.createElement("div");
+                likesContent.style = `
                         display: flex;
                         align-items: center;
                         margin-right: 10px;
                         `;
 
-                        const like = document.createElement("div");
+                const like = document.createElement("div");
 
-                        //Gestion bouton like
-                        if (dataLikers.data) {
-                          const userLiker = dataLikers.data.map(
-                            (e) => e.likerId
-                          );
-                          const userLikerBoolean = userLiker.includes(PosterId);
+                //Gestion bouton like
+                if (dataLikes.data) {
+                  const userLiker = dataLikes.data.map((e) => e.likerId);
 
-                          if (userLikerBoolean) {
-                            like.style = `
+                  const userLikerBoolean = userLiker.includes(PosterId[0]);
+
+                  if (userLikerBoolean) {
+                    like.style = `
                           font-size: 22px;
                           -webkit-text-stroke-width: 1.2px
                           transition: color 2s ease-in-out;
@@ -324,131 +300,136 @@ function PostPage() {
                           -webkit-text-stroke-color: ${logColor.tertiary};
                           cursor: pointer;
                           `;
-                          } else {
-                            like.style = `cursor: pointer;
+                  } else {
+                    like.style = `cursor: pointer;
                           color: transparent;
                           font-size: 20px;
                           -webkit-text-stroke-width: 1.2px;
                           -webkit-text-stroke-color: ${logColor.tertiary};
                           font-weight: bold;
                           `;
-                          }
-                        } else {
-                          like.style = `cursor: pointer;
+                  }
+                } else {
+                  like.style = `cursor: pointer;
                           color: transparent;
                           font-size: 20px;
                           -webkit-text-stroke-width: 1.2px;
                           -webkit-text-stroke-color: ${logColor.tertiary};
                           font-weight: bold;
                           `;
-                        }
-                        like.onclick = () => {
-                          handleLikes();
-                        };
+                }
+                like.onclick = () => {
+                  handleLikes();
+                };
 
-                        const numbersOfLikes = document.createElement("div");
-                        numbersOfLikes.style = `
+                const numbersOfLikes = document.createElement("div");
+                numbersOfLikes.style = `
                         margin-left:5px;
                         `;
 
-                        const posterName = document.createElement("p");
-                        posterName.style = "margin:10px;";
+                const posterName = document.createElement("p");
+                posterName.style = "margin:10px;";
 
-                        const updateContent = document.createElement("div");
-                        updateContent.style = `
+                const updateContent = document.createElement("div");
+                updateContent.style = `
                         width:100%;
                         display:flex;
                         justify-content: center;
                         `;
 
-                        const postTexte = document.createElement("p");
+                const postTexte = document.createElement("p");
 
-                        const postImgContent = document.createElement("div");
-                        postImgContent.style = `
+                const postImgContent = document.createElement("div");
+                postImgContent.style = `
                         width:80%;
                         height: 100%;
                         margin: 20px;
                         `;
 
-                        postTexte.style = `width:100%; margin:20px;`;
+                postTexte.style = `width:100%; margin:20px;`;
 
-                        const postPhoto = document.createElement("img");
-                        postPhoto.style = `
+                const postPhoto = document.createElement("img");
+                postPhoto.style = `
                           width:100%;
                           height:100%;
                          max-height:100%;
                          max-width:100%;
                           `;
 
-                        const buttonComments = document.createElement("input");
-                        buttonComments.value = "Commentaires";
-                        buttonComments.type = "button";
-                        buttonComments.style = `width:100px;margin-bottom:20px;`;
-                        buttonComments.onclick = () => {
-                          HandleComments();
-                        };
+                const buttonComments = document.createElement("input");
+                buttonComments.value = "Commentaires";
+                buttonComments.type = "button";
+                buttonComments.style = `width:100px;margin-bottom:20px;`;
+                buttonComments.onclick = () => {
+                  HandleComments();
+                };
 
-                        const commentsContent = document.createElement("div");
-                        commentsContent.style = `width: 100%;`;
+                const commentsContent = document.createElement("div");
+                commentsContent.style = `width: 100%;`;
+                //insertion d'éléments dans le DOM
+                postsContent.appendChild(postContent);
+                postContent.appendChild(posterContent);
+                if (
+                  PosterId[0] === element.posterId ||
+                  PosterId[1] === "admin"
+                ) {
+                  postContent.appendChild(divPostUpdate);
+                  divPostUpdate.appendChild(buttonUpdate);
+                  divPostUpdate.appendChild(buttonDelete);
+                  postContent.appendChild(updateContent);
+                }
+                posterContent.appendChild(posterName);
+                posterContent.appendChild(likesContent);
+                likesContent.appendChild(like);
+                likesContent.appendChild(numbersOfLikes);
+                if (element.photo) {
+                  postContent.appendChild(postImgContent);
+                  postImgContent.appendChild(postPhoto);
+                }
+                if (element.texte) {
+                  postContent.appendChild(postTexte);
+                }
+                postContent.appendChild(buttonComments);
+                postContent.appendChild(commentsContent);
 
-                        //insertion d'éléments dans le DOM
-                        postsContent.appendChild(postContent);
-                        postContent.appendChild(posterContent);
-                        if (PosterId === element.posterId || PosterId === 95) {
-                          postContent.appendChild(divPostUpdate);
-                          divPostUpdate.appendChild(buttonUpdate);
-                          divPostUpdate.appendChild(buttonDelete);
-                          postContent.appendChild(updateContent);
-                        }
-                        posterContent.appendChild(posterName);
-                        posterContent.appendChild(likesContent);
-                        likesContent.appendChild(like);
-                        likesContent.appendChild(numbersOfLikes);
-                        if (element.photo) {
-                          postContent.appendChild(postImgContent);
-                          postImgContent.appendChild(postPhoto);
-                        }
-                        if (element.texte) {
-                          postContent.appendChild(postTexte);
-                        }
-                        postContent.appendChild(buttonComments);
-                        postContent.appendChild(commentsContent);
+                posterName.innerHTML = `Posté par : ${element.pseudo}`;
 
-                        if (dataUser.data.pseudo) {
-                          posterName.innerHTML = `Posté par : ${dataUser.data.pseudo}`;
-                        } else {
-                          posterName.innerHTML = `Posté par : un ancien utilisateur`;
-                        }
-                        like.innerHTML = `<i class="fas fa-heart"></i>`;
+                like.innerHTML = `<i class="fas fa-heart"></i>`;
+                if (dataLikes.data[0]) {
+                  const searchNumbersOfLikes = dataLikes.data.map(
+                    (e) => e.likerId
+                  );
+                  numbersOfLikes.innerHTML = `${searchNumbersOfLikes.length}`;
+                } else {
+                  numbersOfLikes.innerHTML = "0";
+                }
 
-                        numbersOfLikes.innerHTML = `${dataLike.data[0]}`;
+                if (element.photo) {
+                  postPhoto.src = element.photo;
+                  postPhoto.alt = "Photo du post";
+                }
+                if (element.texte) {
+                  postTexte.innerHTML = ` ${element.texte} `;
+                }
 
-                        if (element.photo) {
-                          postPhoto.src = element.photo;
-                          postPhoto.alt = "Photo du post";
-                        }
-                        if (element.texte) {
-                          postTexte.innerHTML = ` ${element.texte} `;
-                        }
+                /////////////////////////// Liker un post ///////////////////////////
 
-                        /////////////////////////// Liker un post ///////////////////////////
-
-                        const handleLikes = () => {
-                          axios({
-                            method: "post",
-                            url: `http://localhost:5000/api/post/like/${element.postId}`,
-                            withCredentials: true,
-                            data: { likerId: PosterId },
-                          })
-                            .then((dataPostLike) => {
-                              axios({
-                                method: "get",
-                                url: `http://localhost:5000/api/post/like/${element.postId}`,
-                                withCredentials: true,
-                              })
-                                .then((dataLike) => {
-                                  if (dataPostLike.data.message === "Liké !") {
-                                    like.style = `
+                const handleLikes = () => {
+                  axios({
+                    method: "post",
+                    url: `http://localhost:5000/api/post/like/${element.postId}`,
+                    withCredentials: true,
+                    data: { likerId: PosterId[0] },
+                  })
+                    .then((dataPostLike) => {
+                      axios({
+                        method: "get",
+                        url: `http://localhost:5000/api/post/like/${element.postId}`,
+                        withCredentials: true,
+                      })
+                        .then((dataLike) => {
+                          if (dataPostLike.data.message === "Liké !") {
+                            like.style = `
                                     font-size: 22px;
                                     -webkit-text-stroke-width: 1.2px
                                     transition: color 2s ease-in-out;
@@ -459,42 +440,55 @@ function PostPage() {
                                     cursor: pointer;
                                     `;
 
-                                    numbersOfLikes.innerHTML = `${dataLike.data[0]}`;
-                                  }
-                                  if (
-                                    dataPostLike.data.message === "Unliké !"
-                                  ) {
-                                    like.style = `cursor: pointer;
+                            if (dataLike.data[0]) {
+                              const searchNumbersOfLikes = dataLike.data.map(
+                                (e) => e.likerId
+                              );
+                              numbersOfLikes.innerHTML = `${searchNumbersOfLikes.length}`;
+                            } else {
+                              numbersOfLikes.innerHTML = "0";
+                            }
+                          }
+
+                          if (dataPostLike.data.message === "Unliké !") {
+                            like.style = `cursor: pointer;
                                     color: transparent;
                                     font-size: 20px;
                                     -webkit-text-stroke-width: 1.2px;
                                     -webkit-text-stroke-color: ${logColor.tertiary};
                                     font-weight: bold;`;
-                                    numbersOfLikes.innerHTML = `${dataLike.data[0]}`;
-                                  }
-                                  console.log(dataPostLike.data.message);
-                                })
-                                .catch((error) => {
-                                  return console.log(error);
-                                });
-                            })
-                            .catch((error) => {
-                              return console.log(error);
-                            });
-                        };
+                            if (dataLike.data[0]) {
+                              const searchNumbersOfLikes = dataLike.data.map(
+                                (e) => e.likerId
+                              );
+                              numbersOfLikes.innerHTML = `${searchNumbersOfLikes.length}`;
+                            } else {
+                              numbersOfLikes.innerHTML = "0";
+                            }
+                          }
+                          console.log(dataPostLike.data.message);
+                        })
+                        .catch((error) => {
+                          return console.log(error);
+                        });
+                    })
+                    .catch((error) => {
+                      return console.log(error);
+                    });
+                };
 
-                        /////////////////////////// Modifier un post ///////////////////////////
+                /////////////////////////// Modifier un post ///////////////////////////
 
-                        let postUpdateActiv = false;
+                let postUpdateActiv = false;
 
-                        const UpdatePost = () => {
-                          if (postUpdateActiv === false) {
-                            //création d'éléments dans le DOM
-                            const updateForm = document.createElement("form");
-                            updateForm.onsubmit = (e) => {
-                              Update(e);
-                            };
-                            updateForm.style = `
+                const UpdatePost = () => {
+                  if (postUpdateActiv === false) {
+                    //création d'éléments dans le DOM
+                    const updateForm = document.createElement("form");
+                    updateForm.onsubmit = (e) => {
+                      Update(e);
+                    };
+                    updateForm.style = `
                             display:flex;
                             flex-direction: column;
                             align-items: center;
@@ -502,38 +496,36 @@ function PostPage() {
                             margin:0;
                             `;
 
-                            const updateLabel = document.createElement("label");
-                            updateLabel.htmlFor = "updateTextarea";
-                            updateLabel.innerHTML = "Modifiez ici !";
+                    const updateLabel = document.createElement("label");
+                    updateLabel.htmlFor = "updateTextarea";
+                    updateLabel.innerHTML = "Modifiez ici !";
 
-                            const updateInput =
-                              document.createElement("textarea");
-                            updateInput.id = "updateTextarea";
-                            updateInput.name = "updateTextarea";
-                            updateInput.onchange = (e) => {
-                              updateText = e.target.value;
-                            };
-                            updateInput.style = `
+                    const updateInput = document.createElement("textarea");
+                    updateInput.id = "updateTextarea";
+                    updateInput.name = "updateTextarea";
+                    updateInput.value = element.texte;
+                    updateInput.onchange = (e) => {
+                      updateText = e.target.value;
+                    };
+                    updateInput.style = `
                             width:80%;
                             min-height: 75px;
                             margin-top:10px;
                             margin-bottom:10px;
                             `;
-                            updateInput.placeholder = "Modifiez votre post !";
 
-                            const updateFilesLabel =
-                              document.createElement("label");
-                            updateFilesLabel.htmlFor = "updateFiles";
-                            updateFilesLabel.innerHTML =
-                              "Selectionnez un fichier à télécharger";
-                            updateFilesLabel.style = `
+                    const updateFilesLabel = document.createElement("label");
+                    updateFilesLabel.htmlFor = "updateFiles";
+                    updateFilesLabel.innerHTML =
+                      "Selectionnez un fichier à télécharger";
+                    updateFilesLabel.style = `
                               text-decoration: underline;
                               margin-bottom: 10px;
                               display: flex;
                               text-align: center;
                               `;
-                            updateFilesLabel.onmouseenter = () => {
-                              updateFilesLabel.style = `
+                    updateFilesLabel.onmouseenter = () => {
+                      updateFilesLabel.style = `
                               color: ${logColor.primary};
                               cursor: pointer;
                               text-decoration: underline;
@@ -541,511 +533,465 @@ function PostPage() {
                               display: flex;
                               text-align: center;
                               `;
-                            };
-                            updateFilesLabel.onmouseleave = () => {
-                              updateFilesLabel.style = `
+                    };
+                    updateFilesLabel.onmouseleave = () => {
+                      updateFilesLabel.style = `
                               color:${logColor.tertiary};
                               text-decoration: underline;
                               margin-bottom: 10px;
                               display: flex;
                               text-align: center;
                               `;
-                            };
+                    };
 
-                            const updateFiles = document.createElement("input");
-                            updateFiles.type = "file";
-                            updateFiles.id = "updateFiles";
-                            updateFiles.name = "updateFiles";
-                            updateFiles.style = `
+                    const updateFiles = document.createElement("input");
+                    updateFiles.type = "file";
+                    updateFiles.id = "updateFiles";
+                    updateFiles.name = "updateFiles";
+                    updateFiles.style = `
                             display: none`;
-                            updateFiles.onchange = (e) =>
-                              (updateImage = e.target.files) &
-                              (updateFilesValue.innerHTML =
-                                e.target.value.split("fakepath\\")[1]);
+                    updateFiles.onchange = (e) =>
+                      (updateImage = e.target.files) &
+                      (updateFilesValue.innerHTML =
+                        e.target.value.split("fakepath\\")[1]);
 
-                            const updateFilesValue =
-                              document.createElement("div");
-                            updateFilesValue.style = `
+                    const updateFilesValue = document.createElement("div");
+                    updateFilesValue.style = `
                             display: flex;
                             text-align: center;
                             `;
 
-                            const updateError = document.createElement("div");
-                            updateError.id = "updateError";
-                            updateError.style = `
+                    const updateError = document.createElement("div");
+                    updateError.id = "updateError";
+                    updateError.style = `
                               display: flex;
                               text-align: center;
                               `;
 
-                            const updateButton =
-                              document.createElement("input");
-                            updateButton.type = "submit";
+                    const updateButton = document.createElement("input");
+                    updateButton.type = "submit";
 
-                            //insertion d'éléments dans le DOM
-                            updateContent.appendChild(updateForm);
-                            updateForm.appendChild(updateLabel);
-                            updateForm.appendChild(updateInput);
-                            updateForm.appendChild(updateFilesLabel);
-                            updateForm.appendChild(updateFilesValue);
-                            updateForm.appendChild(updateFiles);
-                            updateForm.appendChild(updateError);
-                            updateForm.appendChild(updateButton);
-                            postUpdateActiv = true;
-                          } else {
-                            updateContent.innerHTML = "";
-                            postUpdateActiv = false;
+                    //insertion d'éléments dans le DOM
+                    updateContent.appendChild(updateForm);
+                    updateForm.appendChild(updateLabel);
+                    updateForm.appendChild(updateInput);
+                    updateForm.appendChild(updateFilesLabel);
+                    updateForm.appendChild(updateFilesValue);
+                    updateForm.appendChild(updateFiles);
+                    updateForm.appendChild(updateError);
+                    updateForm.appendChild(updateButton);
+                    postUpdateActiv = true;
+                  } else {
+                    updateContent.innerHTML = "";
+                    postUpdateActiv = false;
+                  }
+
+                  //envoi des modifications
+                  const Update = (e) => {
+                    e.preventDefault();
+                    try {
+                      const updateError =
+                        document.getElementById("updateError");
+
+                      if (updateText == null && updateImage == null) {
+                        return (updateError.innerHTML = `<p style="color :${logColor.primary}">Veuillez modifié le texte ou l' image</p>`);
+                      }
+
+                      let bodyFormData = new FormData();
+                      bodyFormData.append("posterId", PosterId[0]);
+
+                      if (updateText != null) {
+                        bodyFormData.append("texte", updateText);
+                      }
+                      if (updateImage != null) {
+                        bodyFormData.append("image", updateImage[0]);
+                      }
+                      axios({
+                        method: "put",
+                        url: `http://localhost:5000/api/post/${element.postId}`,
+                        withCredentials: true,
+                        data: bodyFormData,
+                        headers: {
+                          "Content-Type": `multipart/form-data, boundary${bodyFormData._boundary}`,
+                        },
+                      })
+                        .then((data) => {
+                          if (updateText != null) {
+                            updateText = null;
                           }
-
-                          //envoi des modifications
-                          const Update = (e) => {
-                            e.preventDefault();
-                            try {
-                              const updateError =
-                                document.getElementById("updateError");
-
-                              if (updateText == null && updateImage == null) {
-                                return (updateError.innerHTML = `<p style="color :${logColor.primary}">Veuillez modifié le texte ou l' image</p>`);
-                              }
-
-                              let bodyFormData = new FormData();
-                              bodyFormData.append("posterId", PosterId);
-
-                              if (updateText != null) {
-                                bodyFormData.append("texte", updateText);
-                              }
-                              if (updateImage != null) {
-                                bodyFormData.append("image", updateImage[0]);
-                              }
-                              axios({
-                                method: "put",
-                                url: `http://localhost:5000/api/post/${element.postId}`,
-                                withCredentials: true,
-                                data: bodyFormData,
-                                headers: {
-                                  "Content-Type": `multipart/form-data, boundary${bodyFormData._boundary}`,
-                                },
-                              })
-                                .then((data) => {
-                                  if (updateText != null) {
-                                    updateText = null;
-                                  }
-                                  if (updateImage != null) {
-                                    updateImage = null;
-                                  }
-                                  postsContent.innerHTML = "";
-                                  GetPost();
-                                })
-                                .catch((error) => {
-                                  return console.log(error);
-                                });
-                            } catch (error) {
-                              console.log(error);
-                            }
-                          };
-                        };
-
-                        /////////////////////////// Supprimer un post ///////////////////////////
-                        const deletePost = () => {
-                          try {
-                            axios({
-                              method: "delete",
-                              url: `http://localhost:5000/api/post/${element.postId}`,
-                              withCredentials: true,
-                            })
-                              .then((data) => {
-                                alert("Post supprimé");
-                                postsContent.innerHTML = "";
-                                GetPost();
-                              })
-                              .catch((error) => {
-                                return console.log(error);
-                              });
-                          } catch (error) {
-                            console.log(error);
+                          if (updateImage != null) {
+                            updateImage = null;
                           }
-                        };
-                        ////////////////////////////////////////////////////////////////
+                          postsContent.innerHTML = "";
+                          GetPost();
+                        })
+                        .catch((error) => {
+                          return console.log(error);
+                        });
+                    } catch (error) {
+                      console.log(error);
+                    }
+                  };
+                };
 
-                        /////////////////////////// Commentaires ///////////////////////////
-                        let commentActiv = false;
-                        const HandleComments = () => {
-                          if (commentActiv === false) {
-                            commentActiv = true;
+                /////////////////////////// Supprimer un post ///////////////////////////
+                const deletePost = () => {
+                  try {
+                    axios({
+                      method: "delete",
+                      url: `http://localhost:5000/api/post/${element.postId}`,
+                      withCredentials: true,
+                    })
+                      .then((data) => {
+                        alert("Post supprimé");
+                        postsContent.innerHTML = "";
+                        GetPost();
+                      })
+                      .catch((error) => {
+                        return console.log(error);
+                      });
+                  } catch (error) {
+                    console.log(error);
+                  }
+                };
+                ////////////////////////////////////////////////////////////////
 
-                            //création d'élément dans le DOM
-                            const errorComments = document.createElement("div");
-                            errorComments.style = `
+                /////////////////////////// Commentaires ///////////////////////////
+                let commentActiv = false;
+                const HandleComments = () => {
+                  if (commentActiv === false) {
+                    commentActiv = true;
+
+                    //création d'élément dans le DOM
+                    const errorComments = document.createElement("div");
+                    errorComments.style = `
                               color: ${logColor.primary};
                               margin:10px
                               `;
 
-                            const formComment = document.createElement("form");
-                            formComment.style = `
+                    const formComment = document.createElement("form");
+                    formComment.style = `
                               display: flex;
                               flex-direction: column;
                               align-items: center;
                               margin: 20px;
                               `;
-                            formComment.onsubmit = (e) => {
-                              PostComment(e);
-                            };
+                    formComment.onsubmit = (e) => {
+                      PostComment(e);
+                    };
 
-                            const commentLabel =
-                              document.createElement("label");
-                            commentLabel.htmlFor = "commentTextarea";
-                            commentLabel.innerHTML =
-                              "Modifiez votre commentaire";
+                    const commentLabel = document.createElement("label");
+                    commentLabel.htmlFor = "commentTextarea";
+                    commentLabel.innerHTML = "Postez un commentaire !";
 
-                            const addComment =
-                              document.createElement("textarea");
-                            addComment.id = "commentTextarea";
-                            addComment.name = "commentTextarea";
-                            addComment.style = `
+                    const addComment = document.createElement("textarea");
+                    addComment.id = "commentTextarea";
+                    addComment.name = "commentTextarea";
+                    addComment.style = `
                               width:80%;
                               height: 80px;
                               margin-top:10px;
                               `;
-                            addComment.placeholder =
-                              "Ecrivez votre commentaire ici !";
-                            addComment.onchange = (e) => {
-                              comment = e.target.value;
-                            };
+                    addComment.placeholder = "Ecrivez votre commentaire ici !";
+                    addComment.onchange = (e) => {
+                      comment = e.target.value;
+                    };
 
-                            const buttonAddComment =
-                              document.createElement("input");
-                            buttonAddComment.type = "submit";
-                            buttonAddComment.value = " Commenter";
-                            buttonAddComment.style = `
+                    const buttonAddComment = document.createElement("input");
+                    buttonAddComment.type = "submit";
+                    buttonAddComment.value = " Commenter";
+                    buttonAddComment.style = `
                             margin-top:15px;
                             `;
 
-                            const errorComment = document.createElement("div");
+                    const errorComment = document.createElement("div");
 
-                            const divComments = document.createElement("div");
-                            divComments.style = `   
+                    const divComments = document.createElement("div");
+                    divComments.style = `   
                               margin-bottom: 20px;
                               `;
 
-                            //insertion d'éléments dans le DOM
-                            commentsContent.appendChild(errorComments);
-                            commentsContent.appendChild(formComment);
-                            formComment.appendChild(commentLabel);
-                            formComment.appendChild(addComment);
-                            formComment.appendChild(buttonAddComment);
-                            formComment.appendChild(errorComment);
-                            commentsContent.appendChild(divComments);
+                    //insertion d'éléments dans le DOM
+                    commentsContent.appendChild(errorComments);
+                    commentsContent.appendChild(formComment);
+                    formComment.appendChild(commentLabel);
+                    formComment.appendChild(addComment);
+                    formComment.appendChild(buttonAddComment);
+                    formComment.appendChild(errorComment);
+                    commentsContent.appendChild(divComments);
 
-                            //////////////// Affichage commentaires /////////////////
-                            //requête avec l'id du post
-
-                            const GetComments = () => {
-                              axios({
-                                method: "get",
-                                url: `http://localhost:5000/api/post/comment/${element.postId}`,
-                                withCredentials: true,
-                              })
-                                .then((data) => {
-                                  //tri les commentaires du plus récent au plus ancien
-                                  let commentSort = data.data.sort(sortComment);
-                                  console.log(commentSort);
-                                  commentSort.forEach((el) => {
-                                    //requête avec l'id de l'utilisateur qui a poster le commentaire
-                                    axios({
-                                      method: "get",
-                                      url: `http://localhost:5000/api/user/${el.posterId}`,
-                                      withCredentials: true,
-                                    })
-                                      .then((dataUser) => {
-                                        //création d'éléments dans le DOM
-                                        const divComment =
-                                          document.createElement("div");
-                                        divComment.style = `
+                    //////////////// Affichage commentaires /////////////////
+                    //requête avec l'id du post
+                    const GetComments = () => {
+                      axios({
+                        method: "get",
+                        url: `http://localhost:5000/api/post/comment/${element.postId}`,
+                        withCredentials: true,
+                      })
+                        .then((data) => {
+                          console.log(data);
+                          //tri les commentaires du plus récent au plus ancien
+                          let commentSort = data.data.sort(sortComment);
+                          console.log(commentSort);
+                          commentSort.forEach((el) => {
+                            //requête avec l'id de l'utilisateur qui a poster le commentaire
+                            axios({
+                              method: "get",
+                              url: `http://localhost:5000/api/user/${el.posterId}`,
+                              withCredentials: true,
+                            })
+                              .then((dataUser) => {
+                                //création d'éléments dans le DOM
+                                const divComment =
+                                  document.createElement("div");
+                                divComment.style = `
                                           margin-bottom: 20px;
                                           `;
 
-                                        const allComments =
-                                          document.createElement("div");
+                                const allComments =
+                                  document.createElement("div");
 
-                                        const divUpdate =
-                                          document.createElement("div");
+                                const divUpdate = document.createElement("div");
 
-                                        const buttonUpdateComment =
-                                          document.createElement("input");
-                                        buttonUpdateComment.type = "submit";
-                                        buttonUpdateComment.value = "modifier";
-                                        buttonUpdateComment.onclick = () => {
-                                          updateComment();
-                                        };
-                                        buttonUpdateComment.style = `
+                                const buttonUpdateComment =
+                                  document.createElement("input");
+                                buttonUpdateComment.type = "submit";
+                                buttonUpdateComment.value = "modifier";
+                                buttonUpdateComment.onclick = () => {
+                                  updateComment();
+                                };
+                                buttonUpdateComment.style = `
                                         height: 100%;
                                         margin-bottom:10px;
                                         margin-right:10px;
                                         `;
 
-                                        const buttonDeleteComment =
-                                          document.createElement("input");
-                                        buttonDeleteComment.type = "submit";
-                                        buttonDeleteComment.value = "supprimer";
-                                        buttonDeleteComment.onclick = () => {
-                                          deleteComment();
-                                        };
-                                        buttonDeleteComment.style = `
+                                const buttonDeleteComment =
+                                  document.createElement("input");
+                                buttonDeleteComment.type = "submit";
+                                buttonDeleteComment.value = "supprimer";
+                                buttonDeleteComment.onclick = () => {
+                                  deleteComment();
+                                };
+                                buttonDeleteComment.style = `
                                           height: 100%;
                                           margin-bottom:10px;
                                           margin-left: 10px;
                                           `;
 
-                                        allComments.style = `
+                                allComments.style = `
                                         border:1px solid black;
                                         border-radius: 20px;
                                         background-color: ${logColor.secondary};
                                         margin: 10px;
                                         `;
 
-                                        //insertion d'éléments dans le DOM
-                                        commentsContent.appendChild(
-                                          errorComments
-                                        );
-                                        divComments.appendChild(divComment);
-                                        divComment.appendChild(allComments);
-                                        divComment.appendChild(divUpdate);
-                                        if (
-                                          PosterId === el.posterId ||
-                                          PosterId === 95
-                                        ) {
-                                          divUpdate.appendChild(
-                                            buttonUpdateComment
-                                          );
-                                          divUpdate.appendChild(
-                                            buttonDeleteComment
-                                          );
-                                        }
+                                //insertion d'éléments dans le DOM
+                                commentsContent.appendChild(errorComments);
+                                divComments.appendChild(divComment);
+                                divComment.appendChild(allComments);
+                                divComment.appendChild(divUpdate);
+                                if (
+                                  PosterId[0] === el.posterId ||
+                                  PosterId[1] === "admin"
+                                ) {
+                                  divUpdate.appendChild(buttonUpdateComment);
+                                  divUpdate.appendChild(buttonDeleteComment);
+                                }
 
-                                        allComments.innerHTML = `
+                                allComments.innerHTML = `
                                         <p>Commentaire écrit par :   <span style="color: ${logColor.primary}">${dataUser.data.pseudo}</span></p>
                                         <p>${el.text}</p>`;
 
-                                        const updateFormComment =
-                                          document.createElement("form");
+                                const updateFormComment =
+                                  document.createElement("form");
 
-                                        const updateErrorComment =
-                                          document.createElement("div");
+                                const updateErrorComment =
+                                  document.createElement("div");
 
-                                        ///////////////////////////////Modifier un commentaire///////////////////////////
+                                ///////////////////////////////Modifier un commentaire///////////////////////////
 
-                                        let commentUpdateActiv = false;
-                                        const updateComment = () => {
-                                          if (commentUpdateActiv === false) {
-                                            commentUpdateActiv = true;
+                                let commentUpdateActiv = false;
+                                const updateComment = () => {
+                                  if (commentUpdateActiv === false) {
+                                    commentUpdateActiv = true;
 
-                                            //création d'éléments dans le DOM
-                                            updateFormComment.onsubmit = (
-                                              e
-                                            ) => {
-                                              update(e);
-                                            };
-                                            updateFormComment.style = `
+                                    //création d'éléments dans le DOM
+                                    updateFormComment.onsubmit = (e) => {
+                                      update(e);
+                                    };
+                                    updateFormComment.style = `
                                             display:flex;
                                             flex-direction: column;
                                             align-items:center;
                                             `;
 
-                                            const updateCommentLabel =
-                                              document.createElement("label");
-                                            updateCommentLabel.htmlFor =
-                                              "updateInputComment";
-                                            updateCommentLabel.innerHTML =
-                                              "Modifiez votre commentaire";
+                                    const updateCommentLabel =
+                                      document.createElement("label");
+                                    updateCommentLabel.htmlFor =
+                                      "updateInputComment";
+                                    updateCommentLabel.innerHTML =
+                                      "Modifiez votre commentaire";
 
-                                            const updateInputComment =
-                                              document.createElement(
-                                                "textarea"
-                                              );
-                                            updateInputComment.id =
-                                              "updateInputComment";
-                                            updateInputComment.name =
-                                              "updateInputComment";
-                                            updateInputComment.onchange = (
-                                              e
-                                            ) => {
-                                              updateTextComment =
-                                                e.target.value;
-                                            };
-                                            updateInputComment.style = `
-                                            width:70%;
-                                            height: 75px;
-                                            margin-bottom: 15px;
-                                            `;
-                                            updateInputComment.placeholder =
-                                              " Ecrivez votre commentaire ici !";
+                                    const updateInputComment =
+                                      document.createElement("textarea");
+                                    updateInputComment.id =
+                                      "updateInputComment";
+                                    updateInputComment.name =
+                                      "updateInputComment";
+                                    updateInputComment.onchange = (e) => {
+                                      updateTextComment = e.target.value;
+                                    };
+                                    updateInputComment.style = `
+                                                width:70%;
+                                                height: 75px;
+                                                margin-bottom: 15px;
+                                                `;
+                                    updateInputComment.value = el.text;
 
-                                            const updateButton =
-                                              document.createElement("input");
-                                            updateButton.type = "submit";
+                                    const updateButton =
+                                      document.createElement("input");
+                                    updateButton.type = "submit";
 
-                                            //insertion d'éléments dans le DOM
-                                            divComment.appendChild(
-                                              updateFormComment
-                                            );
-                                            divComment.appendChild(
-                                              updateErrorComment
-                                            );
-                                            updateFormComment.appendChild(
-                                              updateCommentLabel
-                                            );
-                                            updateFormComment.appendChild(
-                                              updateInputComment
-                                            );
+                                    //insertion d'éléments dans le DOM
+                                    divComment.appendChild(updateFormComment);
+                                    divComment.appendChild(updateErrorComment);
+                                    updateFormComment.appendChild(
+                                      updateCommentLabel
+                                    );
+                                    updateFormComment.appendChild(
+                                      updateInputComment
+                                    );
 
-                                            updateFormComment.appendChild(
-                                              updateButton
-                                            );
-                                            //envoi des modifications du commentaire
-                                            const update = (e) => {
-                                              e.preventDefault();
-                                              try {
-                                                if (
-                                                  updateTextComment === null
-                                                ) {
-                                                  return (updateErrorComment.innerHTML = `<p style="color :${logColor.primary}">Veuillez modifié le commentaire</p>`);
-                                                }
+                                    updateFormComment.appendChild(updateButton);
+                                    //envoi des modifications du commentaire
+                                    const update = (e) => {
+                                      e.preventDefault();
+                                      try {
+                                        if (updateTextComment === null) {
+                                          return (updateErrorComment.innerHTML = `<p style="color :${logColor.primary}">Veuillez modifié le commentaire</p>`);
+                                        }
 
-                                                axios({
-                                                  method: "put",
-                                                  url: `http://localhost:5000/api/post/comment/${el.id}`,
-                                                  withCredentials: true,
-                                                  data: {
-                                                    posterId: PosterId,
-                                                    postId: element.postId,
-                                                    text: updateTextComment,
-                                                  },
-                                                })
-                                                  .then((data) => {
-                                                    divComments.innerHTML = "";
-                                                    updateTextComment = null;
-                                                    GetComments();
-                                                  })
-                                                  .catch((error) => {
-                                                    return console.log(error);
-                                                  });
-                                              } catch (error) {
-                                                console.log(error);
-                                              }
-                                            };
-                                          } else {
-                                            commentUpdateActiv = false;
-                                            updateFormComment.innerHTML = "";
-                                            updateErrorComment.innerHTML = "";
-                                          }
-                                        };
+                                        axios({
+                                          method: "put",
+                                          url: `http://localhost:5000/api/post/comment/${el.id}`,
+                                          withCredentials: true,
+                                          data: {
+                                            posterId: PosterId[0],
+                                            postId: element.postId,
+                                            text: updateTextComment,
+                                          },
+                                        })
+                                          .then((data) => {
+                                            divComments.innerHTML = "";
+                                            updateTextComment = null;
+                                            GetComments();
+                                          })
+                                          .catch((error) => {
+                                            return console.log(error);
+                                          });
+                                      } catch (error) {
+                                        console.log(error);
+                                      }
+                                    };
+                                  } else {
+                                    commentUpdateActiv = false;
+                                    updateFormComment.innerHTML = "";
+                                    updateErrorComment.innerHTML = "";
+                                  }
+                                };
 
-                                        //////////////////////////////Supprimer un commentaire///////////
-                                        const deleteComment = () => {
-                                          try {
-                                            axios({
-                                              method: "delete",
-                                              url: `http://localhost:5000/api/post/comment/${el.id}`,
-                                              withCredentials: true,
-                                            })
-                                              .then((data) => {
-                                                if (updateErrorComment) {
-                                                  updateErrorComment.innerHTML =
-                                                    "";
-                                                }
-                                                divComments.innerHTML = "";
-                                                GetComments();
-                                              })
-                                              .catch((error) => {
-                                                return console.log(error);
-                                              });
-                                          } catch (error) {
-                                            console.log(error);
-                                          }
-                                        };
-                                        /////////////////////////////////////////////////////////////////
+                                //////////////////////////////Supprimer un commentaire///////////
+                                const deleteComment = () => {
+                                  try {
+                                    axios({
+                                      method: "delete",
+                                      url: `http://localhost:5000/api/post/comment/${el.id}`,
+                                      withCredentials: true,
+                                    })
+                                      .then((data) => {
+                                        if (updateErrorComment) {
+                                          updateErrorComment.innerHTML = "";
+                                        }
+                                        divComments.innerHTML = "";
+                                        GetComments();
                                       })
-                                      .catch((err) => {
-                                        console.log(err);
+                                      .catch((error) => {
+                                        return console.log(error);
                                       });
-                                  });
-                                })
+                                  } catch (error) {
+                                    console.log(error);
+                                  }
+                                };
+                                /////////////////////////////////////////////////////////////////
+                              })
+                              .catch((err) => {
+                                console.log(err);
+                              });
+                          });
+                        })
+                        .catch((error) => {
+                          errorComments.innerHTML =
+                            "Aucun commentaire sur ce post";
+                          console.log(error);
+                        });
+                    };
+                    GetComments();
 
-                                .catch((error) => {
-                                  errorComments.innerHTML =
-                                    "Aucun commentaire sur ce post";
-                                  console.log(error);
-                                });
-                            };
+                    ////////////////////  Poster un commentaire /////////////////////
+
+                    const PostComment = (e) => {
+                      e.preventDefault();
+
+                      if (comment === null) {
+                        return (errorComment.innerHTML = `<p style="color :${logColor.primary}">Veuillez écrire un commentaire</p>`);
+                      }
+                      try {
+                        axios({
+                          method: "post",
+                          url: `http://localhost:5000/api/post/comment/`,
+                          withCredentials: true,
+                          data: {
+                            posterId: PosterId[0],
+                            postId: element.postId,
+                            text: comment,
+                          },
+                        })
+                          .then((data) => {
+                            console.log(data);
+                            if (errorComments) {
+                              errorComments.innerHTML = null;
+                            }
+                            if (errorComment) {
+                              errorComment.innerHTML = null;
+                            }
+                            addComment.value = "";
+                            divComments.innerHTML = "";
+                            comment = null;
                             GetComments();
+                          })
+                          .catch((error) => {
+                            return console.log(error);
+                          });
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    };
+                  } else {
+                    commentsContent.innerHTML = "";
+                    commentActiv = false;
+                  }
+                };
 
-                            ////////////////////  Poster un commentaire /////////////////////
-
-                            const PostComment = (e) => {
-                              e.preventDefault();
-
-                              if (comment === null) {
-                                return (errorComment.innerHTML = `<p style="color :${logColor.primary}">Veuillez écrire un commentaire</p>`);
-                              }
-                              try {
-                                axios({
-                                  method: "post",
-                                  url: `http://localhost:5000/api/post/comment/`,
-                                  withCredentials: true,
-                                  data: {
-                                    posterId: PosterId,
-                                    postId: element.postId,
-                                    text: comment,
-                                  },
-                                })
-                                  .then((data) => {
-                                    console.log(data);
-                                    if (errorComments) {
-                                      errorComments.innerHTML = null;
-                                    }
-                                    if (errorComment) {
-                                      errorComment.innerHTML = null;
-                                    }
-                                    addComment.value = "";
-                                    divComments.innerHTML = "";
-                                    comment = null;
-                                    GetComments();
-                                  })
-                                  .catch((error) => {
-                                    return console.log(error);
-                                  });
-                              } catch (error) {
-                                console.log(error);
-                              }
-                            };
-                          } else {
-                            commentsContent.innerHTML = "";
-                            commentActiv = false;
-                          }
-                        };
-
-                        /////////////////////////////////////////////////////////////////
-                      })
-                      .catch((error) => {
-                        return console.log(error);
-                      });
-                  })
-                  .catch((error) => {
-                    if (
-                      error.response.data.message === "Utilisateur introuvable"
-                    ) {
-                      console.log("Utilisateur supprimé");
-                    } else {
-                      console.log(error);
-                    }
-                  });
+                /////////////////////////////////////////////////////////////////
               })
               .catch((error) => {
-                return console.log(error);
+                console.log(error);
               });
           });
         })
         .catch((error) => {
-          return console.log(error);
+          console.log(error);
         });
     };
     GetPost();

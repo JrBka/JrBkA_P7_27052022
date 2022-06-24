@@ -111,7 +111,6 @@ module.exports.login = (req, res, next) => {
                   sameSite: true,
                   httpOnly: true,
                   maxAge: 1 * 24 * 60 * 60 * 1000,
-                  //secure: true,
                 });
                 res.status(200).json({
                   message: "Vous êtes connecté",

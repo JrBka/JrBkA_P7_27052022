@@ -50,25 +50,29 @@ module.exports.getComment = (req, res) => {
 
 module.exports.modifyComment = (req, res) => {
   try {
-    console.log(req.body);
-    console.log(req.cookies.token.id);
-    if (req.body.posterId != req.cookies.token.id || req.body.posterId != 95) {
+    if (
+      req.body.posterId === req.cookies.token.id ||
+      res.locals.user[0].privilege == "admin"
+    ) {
+      db.query(
+        `UPDATE comments SET text = ? WHERE id = ?  AND postId = ? `,
+        [req.body.text, req.params.id, req.body.postId],
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({ message: err });
+          }
+          if (!result) {
+            return res.status(400).json({ message: "Commentaire introuvable" });
+          } else {
+            res
+              .status(200)
+              .json({ message: "Commentaire modifié : " + result });
+          }
+        }
+      );
+    } else {
       return res.status(400).json({ message: "reqête non autorisé" });
     }
-    db.query(
-      `UPDATE comments SET text = ? WHERE id = ?  AND postId = ? `,
-      [req.body.text, req.params.id, req.body.postId],
-      (err, result) => {
-        if (err) {
-          return res.status(400).json({ message: err });
-        }
-        if (!result) {
-          return res.status(400).json({ message: "Commentaire introuvable" });
-        } else {
-          res.status(200).json({ message: "Commentaire modifié : " + result });
-        }
-      }
-    );
   } catch (error) {
     return res.status(400).json({ message: error });
   }
@@ -85,7 +89,7 @@ module.exports.deleteComment = (req, res) => {
         }
         if (
           resultat[0].posterId == req.cookies.token.id ||
-          req.cookies.token.id === 95
+          res.locals.user[0].privilege == "admin"
         ) {
           db.query(
             `DELETE FROM comments WHERE id = ?`,

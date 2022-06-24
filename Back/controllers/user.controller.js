@@ -24,7 +24,8 @@ module.exports.getUser = (req, res) => {
   try {
     const oneUser =
       "SELECT id, pseudo, email, bio, photo FROM users WHERE id = ?";
-    db.query(oneUser, req.params.id, (err, result) => {
+    const paramsId = req.params.id.split(",");
+    db.query(oneUser, paramsId[0], (err, result) => {
       if (!result[0]) {
         res.status(400).json({ message: "Utilisateur introuvable" });
       } else {
@@ -55,12 +56,11 @@ module.exports.modifyUser = (req, res) => {
         ) {
           return res.status(400).json({ message: "Requête non authorisé !" });
         }
-        console.log({ ...req.body });
+        console.log(req.body);
 
         // modif password
         if (req.body.password) {
-          console.log(req.body.password);
-          if (req.body.password != "null") {
+          if (req.body.password != null) {
             if (schemaPwd.validate(req.body.password)) {
               let pwd = req.body.password;
               pwdSecret = bcrypt.hash(pwd, 10).then((hash) => {
@@ -93,7 +93,7 @@ module.exports.modifyUser = (req, res) => {
         // modif email
         if (req.body.email) {
           console.log(req.body.email);
-          if (req.body.email != "null") {
+          if (req.body.email != null) {
             if (emailValidator.validate(req.body.email)) {
               db.query(
                 `UPDATE users SET email = ? WHERE id = ?`,
@@ -120,7 +120,7 @@ module.exports.modifyUser = (req, res) => {
         // modifs pseudo
         const regexPseudo = /^[a-zA-Z]{3,20}[0-9]{0,10}$/;
         if (req.body.pseudo) {
-          if (req.body.pseudo != "null" && regexPseudo.exec(req.body.pseudo)) {
+          if (req.body.pseudo != "" && regexPseudo.exec(req.body.pseudo)) {
             console.log(req.body.pseudo);
             db.query(
               `UPDATE users SET pseudo = ? WHERE id = ?`,
@@ -144,7 +144,7 @@ module.exports.modifyUser = (req, res) => {
         // modifs bio
         if (req.body.bio) {
           console.log(req.body.bio);
-          if (req.body.bio != "null") {
+          if (req.body.bio != "") {
             db.query(
               `UPDATE users SET bio = ? WHERE id = ?`,
               [req.body.bio, req.params.id],
@@ -167,7 +167,7 @@ module.exports.modifyUser = (req, res) => {
         // modif photo de profil
         if (req.file) {
           console.log(req.file);
-          if (req.file != "null") {
+          if (req.file != "") {
             const photoProfil =
               "http://localhost:5000/images/profil/profil.jpg";
             if (resultat[0].photo == photoProfil) {

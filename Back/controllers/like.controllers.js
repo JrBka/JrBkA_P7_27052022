@@ -39,29 +39,15 @@ module.exports.likeUnlike = (req, res) => {
   }
 };
 
-module.exports.numbersOflike = (req, res) => {
+module.exports.like = (req, res) => {
   db.query(
-    `SELECT COUNT(*) FROM likes WHERE postId = ?`,
+    `SELECT * FROM likes WHERE postId = ?`,
     req.params.id,
     (err, result) => {
       if (!result[0]) {
         res.status(200).json(0);
       } else {
-        res.status(200).json(Object.values(result[0]));
-      }
-    }
-  );
-};
-
-module.exports.likers = (req, res) => {
-  db.query(
-    `SELECT * FROM likes WHERE postId = ? `,
-    req.params.id,
-    (err, result) => {
-      if (!result[0]) {
-        res.status(200).json(err);
-      } else {
-        res.status(200).json(result);
+        res.status(200).json(Object.values(result));
       }
     }
   );

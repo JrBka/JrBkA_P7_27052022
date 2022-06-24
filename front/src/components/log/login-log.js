@@ -20,7 +20,7 @@ const Button = styled.input`
   color: ${color.tertiary};
   &:hover {
     color: black;
-    box-shadow: ${color.tertiary} 3px 3px 10px;
+    box-shadow: ${color.tertiary} 3px 3px 5px;
     cursor: pointer;
   }
 `;
@@ -28,7 +28,6 @@ const Button = styled.input`
 const ErrorColor = styled.p`
   display: flex;
   text-align: center;
-  color: ${color.primary};
 `;
 
 // connexion à l'application

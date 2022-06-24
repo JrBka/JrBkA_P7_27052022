@@ -20,7 +20,7 @@ const Button = styled.input`
   color: ${color.tertiary};
   &:hover {
     color: black;
-    box-shadow: ${color.tertiary} 3px 3px 10px;
+    box-shadow: ${color.tertiary} 3px 3px 5px;
     cursor: pointer;
   }
 `;
@@ -28,7 +28,6 @@ const Button = styled.input`
 const ErrorColor = styled.p`
   display: flex;
   text-align: center;
-  color: ${color.primary};
 `;
 
 // inscription dans l'application
@@ -51,7 +50,21 @@ function Signup({ pseudo, setPseudo, email, setEmail, password, setPassword }) {
     })
       .then((res) => {
         alert(res.data.message);
-        window.location = "/";
+        Axios({
+          method: "post",
+          url: "http://localhost:5000/api/user/login",
+          withCredentials: true,
+          data: {
+            email,
+            password,
+          },
+        })
+          .then((res) => {
+            window.location = "/home";
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       })
       .catch((error) => {
         const errors = error.response.data;

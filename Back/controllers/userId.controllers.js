@@ -7,7 +7,7 @@ module.exports.getUserId = (req, res, next) => {
   try {
     const token = req.cookies.token.token;
     if (!token) {
-      window.location = "http://localhost:3000/";
+      window.location = "/";
     }
     if (token) {
       jsonwebtoken.verify(
@@ -25,7 +25,10 @@ module.exports.getUserId = (req, res, next) => {
               decodedToken.id,
               (err, result) => {
                 const user = result;
-                res.status(200).json({ userId: user[0].id });
+                res.status(200).json({
+                  userId: user[0].id,
+                  userPrivilege: user[0].privilege,
+                });
                 console.log("utilisateur authentifié :", user[0].pseudo);
               }
             );
