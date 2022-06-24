@@ -139,7 +139,7 @@ function UpdateProfil() {
     if (newPhoto != null && newPhoto != "") {
       bodyFormData.append("image", newPhoto[0]);
     }
-    console.log(bodyFormData.id);
+
     axios({
       method: "put",
       url: `http://localhost:5000/api/user/${id[0]}`,
@@ -150,10 +150,10 @@ function UpdateProfil() {
       },
     })
       .then((data) => {
-        setPseudo(newPseudo);
-        setEmail(newEmail);
-        setBio(newBio);
-        setPhoto(newPhoto);
+        newPseudo = null;
+        newEmail = null;
+        newBio = null;
+        newPhoto = null;
 
         if (pseudoError) {
           pseudoError.innerHTML = null;
@@ -192,6 +192,10 @@ function UpdateProfil() {
       .catch((error) => {
         //insertion d'élément dans le DOM
         console.log(error);
+        const errorChamps = document.getElementById("error");
+        if (error.response.data.message === "Champs vides") {
+          errorChamps.innerHTML = "<p>Veuillez modifiez un élément</p>";
+        }
         if (error.response.data.message === "Pseudo invalide") {
           pseudoError.innerHTML = "<p>Pseudo invalide</p>";
         }
@@ -213,6 +217,9 @@ function UpdateProfil() {
 
   // supprime le compte de l'utilisateur
   const DeleteUser = () => {
+    if (!window.confirm("Voulez vous vraiment supprimer votre compte?")) {
+      return console.log("Le compte n'a pas été supprimé");
+    }
     axios({
       method: "delete",
       url: `http://localhost:5000/api/user/${id[0]}`,

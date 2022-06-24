@@ -125,10 +125,14 @@ const LogoFooter = styled.img`
 `;
 
 // Gestion navBar
+const srcDefault = "http://localhost:5000/images/profil/profil.jpg";
 
 function Headers() {
   const id = useContext(idContext);
   const [img, setImg] = useState("");
+  if (img == "" || img == null) {
+    setImg(srcDefault);
+  }
   const [postPage, setPostPage] = useState(true);
   const [updateProfil, setUpdateProfil] = useState(false);
   const [usersPage, setUsersPage] = useState(false);

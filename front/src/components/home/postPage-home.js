@@ -222,7 +222,9 @@ function PostPage() {
       })
         .then((data) => {
           //tri des posts
-
+          if (data.data[0] == null || data.data[0] == "") {
+            console.log("probleme");
+          }
           data.data.forEach((element) => {
             axios({
               method: "get",
@@ -636,6 +638,11 @@ function PostPage() {
 
                 /////////////////////////// Supprimer un post ///////////////////////////
                 const deletePost = () => {
+                  if (
+                    !window.confirm("Voulez vous vraiment supprimer ce post?")
+                  ) {
+                    return console.log("Le post n'a pas été supprimé");
+                  }
                   try {
                     axios({
                       method: "delete",
@@ -729,10 +736,9 @@ function PostPage() {
                         withCredentials: true,
                       })
                         .then((data) => {
-                          console.log(data);
                           //tri les commentaires du plus récent au plus ancien
                           let commentSort = data.data.sort(sortComment);
-                          console.log(commentSort);
+
                           commentSort.forEach((el) => {
                             //requête avec l'id de l'utilisateur qui a poster le commentaire
                             axios({
@@ -903,6 +909,15 @@ function PostPage() {
 
                                 //////////////////////////////Supprimer un commentaire///////////
                                 const deleteComment = () => {
+                                  if (
+                                    !window.confirm(
+                                      "Voulez vous vraiment supprimer ce commentaire?"
+                                    )
+                                  ) {
+                                    return console.log(
+                                      "Le commentaire n'a pas été supprimé"
+                                    );
+                                  }
                                   try {
                                     axios({
                                       method: "delete",
@@ -958,7 +973,6 @@ function PostPage() {
                           },
                         })
                           .then((data) => {
-                            console.log(data);
                             if (errorComments) {
                               errorComments.innerHTML = null;
                             }

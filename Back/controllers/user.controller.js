@@ -56,7 +56,16 @@ module.exports.modifyUser = (req, res) => {
         ) {
           return res.status(400).json({ message: "Requête non authorisé !" });
         }
-        console.log(req.body);
+
+        let n = 0;
+        if (!req.file) {
+          for (let x in req.body) {
+            n++;
+          }
+          if (n <= 1) {
+            return res.status(400).json({ message: "Champs vides" });
+          }
+        }
 
         // modif password
         if (req.body.password) {
@@ -92,7 +101,6 @@ module.exports.modifyUser = (req, res) => {
 
         // modif email
         if (req.body.email) {
-          console.log(req.body.email);
           if (req.body.email != null) {
             if (emailValidator.validate(req.body.email)) {
               db.query(
@@ -121,7 +129,6 @@ module.exports.modifyUser = (req, res) => {
         const regexPseudo = /^[a-zA-Z]{3,20}[0-9]{0,10}$/;
         if (req.body.pseudo) {
           if (req.body.pseudo != "" && regexPseudo.exec(req.body.pseudo)) {
-            console.log(req.body.pseudo);
             db.query(
               `UPDATE users SET pseudo = ? WHERE id = ?`,
               [req.body.pseudo, req.params.id],
@@ -143,7 +150,6 @@ module.exports.modifyUser = (req, res) => {
 
         // modifs bio
         if (req.body.bio) {
-          console.log(req.body.bio);
           if (req.body.bio != "") {
             db.query(
               `UPDATE users SET bio = ? WHERE id = ?`,
@@ -166,7 +172,6 @@ module.exports.modifyUser = (req, res) => {
 
         // modif photo de profil
         if (req.file) {
-          console.log(req.file);
           if (req.file != "") {
             const photoProfil =
               "http://localhost:5000/images/profil/profil.jpg";
@@ -236,7 +241,6 @@ module.exports.deleteUser = (req, res) => {
           req.params.id,
           (err, result) => {
             if (result) {
-              console.log(result);
               db.query(
                 `DELETE FROM comments WHERE posterId = ?`,
                 req.params.id,
@@ -255,7 +259,6 @@ module.exports.deleteUser = (req, res) => {
           req.params.id,
           (err, result) => {
             if (result) {
-              console.log(result);
               db.query(
                 `DELETE FROM likes WHERE likerId = ?`,
                 req.params.id,
@@ -273,13 +276,10 @@ module.exports.deleteUser = (req, res) => {
           `SELECT * FROM posts WHERE PosterId = ?`,
           req.params.id,
           (err, result) => {
-            console.log(result);
             if (result) {
               const deletePhoto = result.map((e) => e.photo);
               if (deletePhoto) {
-                console.log(deletePhoto);
                 deletePhoto.forEach((element) => {
-                  console.log(element);
                   const filename = element.split("/posts/")[1];
                   fs.unlink(`images/posts/${filename}`, () => {});
                 });
@@ -299,7 +299,6 @@ module.exports.deleteUser = (req, res) => {
 
         const photoProfil = "http://localhost:5000/images/profil/profil.jpg";
         if (data[0].photo != photoProfil) {
-          console.log(data[0].photo);
           const filename = data[0].photo.split("/profil/")[1];
           fs.unlink(`images/profil/${filename}`, () => {});
         }

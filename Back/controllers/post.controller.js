@@ -11,7 +11,6 @@ module.exports.getPosts = (req, res) => {
           res.status(400).json({ message: "post introuvable" });
         }
         res.status(200).json(result);
-        console.log(result);
       }
     );
   } catch (error) {
